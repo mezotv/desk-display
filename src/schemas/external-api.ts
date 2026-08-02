@@ -11,6 +11,12 @@ export const openMeteoResponseSchema = Schema.Struct({
       weather_code: Schema.optionalKey(Schema.Number),
     }),
   ),
+  daily: Schema.optionalKey(
+    Schema.Struct({
+      sunrise: Schema.optionalKey(Schema.Array(Schema.String)),
+      sunset: Schema.optionalKey(Schema.Array(Schema.String)),
+    }),
+  ),
 });
 
 export const spotifyCurrentlyPlayingSchema = Schema.Struct({

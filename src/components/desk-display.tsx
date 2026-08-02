@@ -6,8 +6,13 @@ import { AppLauncher } from "@/components/app-launcher";
 import { AlarmApp } from "@/components/alarm-app";
 import { AlarmRinging } from "@/components/alarm-ringing";
 import { BootLoader } from "@/components/boot-loader";
+import { NotesApp } from "@/components/notes-app";
 import { SettingsApp } from "@/components/settings-app";
 import { ScreenProtection } from "@/components/screen-protection";
+import { StopwatchApp } from "@/components/stopwatch-app";
+import { TasksApp } from "@/components/tasks-app";
+import { TimerApp } from "@/components/timer-app";
+import { TimerFinished } from "@/components/timer-finished";
 import { BOOT_LOADER_MINIMUM_MS } from "@/constants/boot";
 import {
   SPOTIFY_ACTIVE_REFRESH_INTERVAL_MS,
@@ -47,6 +52,7 @@ import { useRecurringRefresh } from "@/utils/use-recurring-refresh";
 import { getWeatherIcon } from "@/utils/get-weather-icon";
 import { getWeather } from "@/utils/weather.functions";
 import { isNightModeActive } from "@/utils/night-mode-time";
+import { useProductivity } from "@/utils/use-productivity";
 
 export function DeskDisplay({
   initialCalendar,
@@ -71,6 +77,23 @@ export function DeskDisplay({
   const [spotify, setSpotify] = useState(initialSpotify);
   const [system, setSystem] = useState(initialSystem);
   const [weather, setWeather] = useState(initialWeather);
+  const {
+    addTask,
+    changeTimerDuration,
+    clearCompletedTasks,
+    deleteTask,
+    dismissTimerFinished,
+    pauseTimer,
+    ready: productivityReady,
+    resetStopwatch,
+    resetTimer,
+    startTimer,
+    state: productivity,
+    timerFinished,
+    toggleStopwatch,
+    toggleTask,
+    updateNote,
+  } = useProductivity(now);
   const refreshMrr = useServerFn(getMrr);
   const refreshCalendar = useServerFn(getCalendar);
   const refreshSpotify = useServerFn(getSpotify);
@@ -374,7 +397,7 @@ export function DeskDisplay({
 
   const ringingAlarm = alarms.find((alarm) => alarm.id === ringingAlarmId);
   const startupReady =
-    alarmsReady && navigationReady && bootDelayElapsed;
+    alarmsReady && navigationReady && productivityReady && bootDelayElapsed;
 
   if (!startupReady) {
     return (
@@ -397,6 +420,20 @@ export function DeskDisplay({
           alarm={ringingAlarm}
           language={settings.language}
           onDismiss={dismissAlarm}
+        />
+      </ScreenProtection>
+    );
+  }
+
+  if (timerFinished) {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={false}
+      >
+        <TimerFinished
+          language={settings.language}
+          onDismiss={dismissTimerFinished}
         />
       </ScreenProtection>
     );
@@ -456,6 +493,79 @@ export function DeskDisplay({
     );
   }
 
+  if (activeApp === "timer") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <TimerApp
+          language={settings.language}
+          now={now}
+          onChangeDuration={changeTimerDuration}
+          onHome={() => setLauncherOpen(true)}
+          onPause={pauseTimer}
+          onReset={resetTimer}
+          onStart={startTimer}
+          timer={productivity.timer}
+        />
+      </ScreenProtection>
+    );
+  }
+
+  if (activeApp === "stopwatch") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <StopwatchApp
+          language={settings.language}
+          now={now}
+          onHome={() => setLauncherOpen(true)}
+          onReset={resetStopwatch}
+          onToggle={toggleStopwatch}
+          stopwatch={productivity.stopwatch}
+        />
+      </ScreenProtection>
+    );
+  }
+
+  if (activeApp === "tasks") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <TasksApp
+          language={settings.language}
+          onAdd={addTask}
+          onClearCompleted={clearCompletedTasks}
+          onDelete={deleteTask}
+          onHome={() => setLauncherOpen(true)}
+          onToggle={toggleTask}
+          tasks={productivity.tasks}
+        />
+      </ScreenProtection>
+    );
+  }
+
+  if (activeApp === "notes") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <NotesApp
+          language={settings.language}
+          note={productivity.note}
+          onChange={updateNote}
+          onHome={() => setLauncherOpen(true)}
+        />
+      </ScreenProtection>
+    );
+  }
+
   return (
     <ScreenProtection
       enabled={settings.oledProtection}
@@ -469,6 +579,7 @@ export function DeskDisplay({
         mrr={mrr}
         now={now}
         onTap={onAppTap}
+        productivity={productivity}
         spotify={spotify}
         system={system}
         weather={weather}

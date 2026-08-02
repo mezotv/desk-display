@@ -162,7 +162,7 @@ export function AppLauncher({
               />
             </span>
             <span
-              className="mt-0.5 text-[clamp(17px,min(2.1vw,3.5vh),27px)] font-bold leading-none tracking-[0.04em] [@media(max-height:410px)]:text-[15px]"
+              className="mt-0.5 max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-[clamp(17px,min(2.1vw,3.5vh),27px)] font-bold leading-none tracking-[0.04em] [@media(max-height:410px)]:text-[15px]"
               style={{ color: app.accent }}
             >
               {app.label[language]}

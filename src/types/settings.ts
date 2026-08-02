@@ -13,8 +13,10 @@ export type DisplaySettings = {
 
 export type TouchKeyboardProps = {
   language: DisplayLanguage
+  maxLength?: number
   onCancel: () => void
   onSave: (value: string) => void
+  placeholder?: string
   value: string
 }
 

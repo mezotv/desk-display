@@ -1,5 +1,8 @@
+import type { ReactNode } from "react";
+
 import type { CalendarSnapshot } from "@/types/calendar";
 import type { MrrSnapshot } from "@/types/mrr";
+import type { ProductivityState } from "@/types/productivity";
 import type { SpotifySnapshot } from "@/types/spotify";
 import type { DisplayLanguage, DisplaySettings } from "@/types/settings";
 import type { SystemSnapshot } from "@/types/system";
@@ -12,7 +15,14 @@ export type AppId =
   | "clock"
   | "alarm"
   | "calendar"
-  | "twitter"
+  | "timer"
+  | "stopwatch"
+  | "tasks"
+  | "notes"
+  | "world"
+  | "daylight"
+  | "moon"
+  | "progress"
   | "marquee"
   | "system"
   | "settings";
@@ -32,6 +42,7 @@ export type ActiveAppProps = {
   mrr: MrrSnapshot;
   now: Date;
   onTap: () => void;
+  productivity: ProductivityState;
   spotify: SpotifySnapshot;
   system: SystemSnapshot;
   weather: WeatherSnapshot;
@@ -53,4 +64,12 @@ export type AppLauncherProps = {
   now: Date;
   onLaunch: (appId: AppId) => void;
   weatherIcon: string;
+};
+
+export type TouchAppShellProps = {
+  accent: string;
+  children: ReactNode;
+  icon: string;
+  onHome: () => void;
+  title: string;
 };

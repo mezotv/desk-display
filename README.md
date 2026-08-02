@@ -1,8 +1,24 @@
 # Desk Display
 
-Desk Display is a full-screen, touch-friendly Raspberry Pi dashboard with a deliberately pixelated visual style. It currently includes Stripe MRR/ARR, Spotify now playing and playback control, dynamic weather, Google Calendar, a clock, multiple alarms, a marquee mode, settings, and Raspberry Pi system status.
+Desk Display is a full-screen, touch-friendly Raspberry Pi dashboard with a deliberately pixelated visual style. It combines live business and media integrations with practical local-first tools and ambient information screens.
 
 The app is built with React, TanStack Start, Effect, and Tailwind CSS v4. The interface is utility-first end to end: `src/styles.css` only defines the shared Tailwind theme, browser reset, scrollbar utility, and global keyframes. It is designed for kiosk use on a small HDMI or DSI touchscreen, but it also adapts to phones and larger desktop browsers.
+
+## Built-in apps
+
+- Stripe MRR/ARR with normalized recurring revenue
+- Spotify now playing, progress, and play/pause control
+- Current weather and real local sunrise/sunset data
+- Google Calendar with upcoming events
+- Clock, world clock, alarms, countdown timer, and stopwatch
+- Local tasks and a pinned note with an on-screen keyboard
+- Moon phase with dynamically rendered pixel illumination
+- Day, week, month, and year progress
+- Raspberry Pi temperature, uptime, CPU, memory, and network status
+- A dynamic slider that includes connected integrations and useful active local apps
+- Touch settings, German and English UI, Night Mode, and OLED pixel shifting
+
+Timer, stopwatch, task, note, navigation, alarm, and display-setting state is stored locally in the kiosk browser. It survives application and Pi restarts without sending personal content to another service.
 
 ## What you need
 

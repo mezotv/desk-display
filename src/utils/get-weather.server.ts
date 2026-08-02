@@ -50,6 +50,8 @@ const getCurrentWeatherEffect = Effect.fn('Weather.getCurrent')(function*() {
   url.searchParams.set('latitude', String(latitude))
   url.searchParams.set('longitude', String(longitude))
   url.searchParams.set('current', 'temperature_2m,weather_code,is_day')
+  url.searchParams.set('daily', 'sunrise,sunset')
+  url.searchParams.set('forecast_days', '1')
   url.searchParams.set('timezone', 'auto')
 
   const request = HttpClientRequest.get(url).pipe(
@@ -76,6 +78,8 @@ const getCurrentWeatherEffect = Effect.fn('Weather.getCurrent')(function*() {
   const isDay = payload.current?.is_day
   const temperature = payload.current?.temperature_2m
   const weatherCode = payload.current?.weather_code
+  const sunrise = payload.daily?.sunrise?.[0] ?? null
+  const sunset = payload.daily?.sunset?.[0] ?? null
 
   if (
     typeof isDay !== 'number' ||
@@ -95,6 +99,8 @@ const getCurrentWeatherEffect = Effect.fn('Weather.getCurrent')(function*() {
     error: null,
     isDay: isDay === 1,
     location,
+    sunrise,
+    sunset,
     temperatureCelsius: temperature,
     updatedAt: DateTime.formatIso(yield* DateTime.now),
     weatherCode,
@@ -114,6 +120,8 @@ export function getCurrentWeather(): Promise<WeatherSnapshot> {
             error: 'Unable to update weather',
             isDay: null,
             location,
+            sunrise: null,
+            sunset: null,
             temperatureCelsius: null,
             updatedAt: DateTime.formatIso(yield* DateTime.now),
             weatherCode: null,

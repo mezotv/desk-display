@@ -1,13 +1,25 @@
 import { CalendarApp } from "@/components/calendar-app";
+import { DaylightApp } from "@/components/daylight-app";
+import { MarqueeCard } from "@/components/marquee-card";
+import { MoonApp } from "@/components/moon-app";
 import { OverflowMarquee } from "@/components/overflow-marquee";
 import { PixelatedImage } from "@/components/pixelated-image";
+import { ProgressApp } from "@/components/progress-app";
 import { SystemApp } from "@/components/system-app";
+import { WorldClockApp } from "@/components/world-clock-app";
 import { CALENDAR_COPY } from "@/constants/calendar";
+import { AMBIENT_COPY } from "@/constants/ambient";
+import { PRODUCTIVITY_COPY } from "@/constants/productivity";
 import { SPOTIFY_COPY } from "@/constants/spotify";
+import { SYSTEM_COPY } from "@/constants/system";
 import type { ActiveAppProps } from "@/types/apps";
 import { formatClockDate, formatClockTime } from "@/utils/format-clock";
 import { formatCurrency } from "@/utils/format-currency";
+import { formatDuration } from "@/utils/format-duration";
 import { formatPlaybackTime } from "@/utils/format-playback-time";
+import { getDaylightProgress } from "@/utils/get-daylight-progress";
+import { getMoonPhase } from "@/utils/get-moon-phase";
+import { getTimeProgress } from "@/utils/get-time-progress";
 
 export function ActiveApp({
   activeApp,
@@ -17,6 +29,7 @@ export function ActiveApp({
   mrr,
   now,
   onTap,
+  productivity,
   spotify,
   system,
   weather,
@@ -42,16 +55,41 @@ export function ActiveApp({
     : 0;
   const spotifyCopy = SPOTIFY_COPY[language];
   const calendarCopy = CALENDAR_COPY[language];
+  const ambientCopy = AMBIENT_COPY[language];
+  const productivityCopy = PRODUCTIVITY_COPY[language];
+  const systemCopy = SYSTEM_COPY[language];
   const marqueeCalendarEvent = calendar.configured
     ? calendar.events[0]
     : undefined;
   const showMarqueeSpotify = spotify.configured && Boolean(spotify.track);
   const showMarqueeWeather = weather.temperatureCelsius !== null;
+  const daylight = getDaylightProgress(now, weather.sunrise, weather.sunset);
+  const moon = getMoonPhase(now);
+  const yearProgress = getTimeProgress(now).find(
+    (metric) => metric.id === "year",
+  );
+  const timerRemainingMs =
+    productivity.timer.running && productivity.timer.endsAt
+      ? Math.max(0, Date.parse(productivity.timer.endsAt) - now.getTime())
+      : 0;
+  const stopwatchElapsedMs =
+    productivity.stopwatch.running && productivity.stopwatch.startedAt
+      ? productivity.stopwatch.elapsedMs +
+        Math.max(0, now.getTime() - Date.parse(productivity.stopwatch.startedAt))
+      : productivity.stopwatch.elapsedMs;
+  const openTaskCount = productivity.tasks.filter(
+    (task) => !task.completed,
+  ).length;
   const marqueeCardCount =
-    2 +
+    5 +
     Number(showMarqueeWeather) +
     Number(Boolean(marqueeCalendarEvent)) +
-    Number(showMarqueeSpotify);
+    Number(showMarqueeSpotify) +
+    Number(Boolean(daylight)) +
+    Number(productivity.timer.running) +
+    Number(productivity.stopwatch.running) +
+    Number(openTaskCount > 0) +
+    Number(Boolean(productivity.note));
 
   return (
     <main className="relative grid h-dvh min-h-0 w-full overflow-hidden bg-display-bg">
@@ -165,22 +203,6 @@ export function ActiveApp({
           <CalendarApp calendar={calendar} language={language} now={now} />
         )}
 
-        {activeApp === "twitter" && (
-          <div className="flex flex-col items-center justify-center transition-transform duration-100 group-active:scale-[0.985]">
-            <PixelatedImage
-              className="size-[clamp(176px,min(22vw,37vh),300px)] object-contain"
-              src="/logos/twitter.svg"
-              alt="Twitter"
-            />
-            <span className="mt-2.5 text-[clamp(38px,min(4.75vw,8vh),62px)] font-extrabold text-[#55acee]">
-              TWITTER
-            </span>
-            <span className="mt-[5px] text-[clamp(23px,min(2.9vw,4.8vh),36px)] font-semibold text-[#696976]">
-              CONNECT LATER
-            </span>
-          </div>
-        )}
-
         {activeApp === "clock" && (
           <div className="flex flex-col items-center justify-center transition-transform duration-100 group-active:scale-[0.985]">
             <time className="whitespace-nowrap text-[clamp(94px,min(16.5vw,28vh),240px)] font-extrabold leading-[0.82] tracking-[-0.07em] text-slate-50">
@@ -194,6 +216,20 @@ export function ActiveApp({
 
         {activeApp === "system" && (
           <SystemApp language={language} system={system} />
+        )}
+
+        {activeApp === "world" && (
+          <WorldClockApp language={language} now={now} />
+        )}
+
+        {activeApp === "daylight" && (
+          <DaylightApp language={language} now={now} weather={weather} />
+        )}
+
+        {activeApp === "moon" && <MoonApp language={language} now={now} />}
+
+        {activeApp === "progress" && (
+          <ProgressApp language={language} now={now} />
         )}
 
         {activeApp === "marquee" && (
@@ -301,6 +337,68 @@ export function ActiveApp({
                       </div>
                     </section>
                   )}
+                  {daylight && (
+                    <MarqueeCard
+                      accent="#fb923c"
+                      icon="/logos/daylight-pixel.svg"
+                      primary={`${daylight.daylightHours.toFixed(1)}H`}
+                      secondary={ambientCopy.daylight}
+                    />
+                  )}
+                  {productivity.timer.running && (
+                    <MarqueeCard
+                      accent="#f97316"
+                      icon="/logos/timer-pixel.svg"
+                      primary={formatDuration(timerRemainingMs)}
+                      secondary={productivityCopy.timer}
+                    />
+                  )}
+                  {productivity.stopwatch.running && (
+                    <MarqueeCard
+                      accent="#22d3ee"
+                      icon="/logos/stopwatch-pixel.svg"
+                      primary={formatDuration(stopwatchElapsedMs)}
+                      secondary={productivityCopy.stopwatch}
+                    />
+                  )}
+                  {openTaskCount > 0 && (
+                    <MarqueeCard
+                      accent="#34d399"
+                      icon="/logos/tasks-pixel.svg"
+                      primary={String(openTaskCount)}
+                      secondary={productivityCopy.tasks}
+                    />
+                  )}
+                  {productivity.note && (
+                    <MarqueeCard
+                      accent="#facc15"
+                      icon="/logos/notes-pixel.svg"
+                      primary={productivity.note}
+                      secondary={productivityCopy.note}
+                    />
+                  )}
+                  <MarqueeCard
+                    accent="#22d3ee"
+                    icon="/logos/system-pixel.svg"
+                    primary={
+                      system.cpuTemperatureCelsius === null
+                        ? systemCopy.networkTypes[system.networkType]
+                        : `${Math.round(system.cpuTemperatureCelsius)}°`
+                    }
+                    secondary={systemCopy.system}
+                  />
+                  <MarqueeCard
+                    accent="#c4b5fd"
+                    icon="/logos/moon-pixel.svg"
+                    primary={`${moon.illuminationPercent}%`}
+                    secondary={ambientCopy.moonPhases[moon.name]}
+                  />
+                  <MarqueeCard
+                    accent="#a3e635"
+                    icon="/logos/progress-pixel.svg"
+                    primary={`${(yearProgress?.percent ?? 0).toFixed(1)}%`}
+                    secondary={ambientCopy.progressLabels.year}
+                  />
                 </div>
               ))}
             </div>

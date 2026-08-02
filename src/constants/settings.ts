@@ -12,11 +12,17 @@ export const NIGHT_MODE_TIME_STEP_MINUTES = 15
 
 export const KEYBOARD_ROWS: Record<DisplayLanguage, string[][]> = {
   de: [
+    [...'1234567890'],
     [...'QWERTZUIOPÜ'],
     [...'ASDFGHJKLÖÄ'],
     [...'YXCVBNM'],
   ],
-  en: [[...'QWERTYUIOP'], [...'ASDFGHJKL'], [...'ZXCVBNM']],
+  en: [
+    [...'1234567890'],
+    [...'QWERTYUIOP'],
+    [...'ASDFGHJKL'],
+    [...'ZXCVBNM'],
+  ],
 }
 
 export const LOCALIZED_COPY = {

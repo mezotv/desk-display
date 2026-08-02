@@ -9,8 +9,10 @@ import type { TouchKeyboardProps } from '@/types/settings'
 
 export function TouchKeyboard({
   language,
+  maxLength = MAX_DISPLAY_NAME_LENGTH,
   onCancel,
   onSave,
+  placeholder = '…',
   value,
 }: TouchKeyboardProps) {
   const [draft, setDraft] = useState(value)
@@ -18,7 +20,7 @@ export function TouchKeyboard({
 
   const addCharacter = (character: string) => {
     setDraft((current) => {
-      if (current.length >= MAX_DISPLAY_NAME_LENGTH) return current
+      if (current.length >= maxLength) return current
       const nextCharacter = current.length
         ? character.toLocaleLowerCase(language)
         : character
@@ -29,9 +31,9 @@ export function TouchKeyboard({
   return (
     <main className="relative grid h-dvh min-h-0 w-full grid-rows-[62px_minmax(0,1fr)_58px] gap-2 overflow-hidden bg-display-bg p-3.5 px-3.5 [@media(min-width:1100px)_and_(min-height:650px)]:mx-auto [@media(min-width:1100px)_and_(min-height:650px)]:w-[min(100%,1500px)] max-[620px]:px-1.5">
       <div className="overflow-hidden rounded-[10px] bg-display-panel text-center text-[32px] font-bold leading-[62px] text-display-text text-ellipsis whitespace-nowrap max-[620px]:text-2xl">
-        {draft || '…'}
+        {draft || placeholder}
       </div>
-      <div className="grid min-h-0 grid-rows-3 gap-[7px]">
+      <div className="grid min-h-0 grid-rows-4 gap-[6px]">
         {KEYBOARD_ROWS[language].map((row, rowIndex) => (
           <div
             className="flex min-h-0 justify-center gap-[clamp(2px,0.75vw,10px)]"
@@ -70,7 +72,7 @@ export function TouchKeyboard({
           className="min-w-[210px] rounded-[9px] border-0 bg-[#17171d] text-xl font-bold text-[#d6d6df] outline-none touch-manipulation active:scale-[0.97] active:bg-[#282833]"
           onClick={() =>
             setDraft((current) =>
-              current.length < MAX_DISPLAY_NAME_LENGTH ? `${current} ` : current,
+              current.length < maxLength ? `${current} ` : current,
             )
           }
           type="button"
