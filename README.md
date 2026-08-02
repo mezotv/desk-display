@@ -68,15 +68,166 @@ This visual dimmer is independent of the optional systemd backlight schedule in 
 
 ## Raspberry Pi deployment
 
-The files in `deploy/` provide a systemd service, Chromium kiosk launcher, and optional overnight backlight schedule. They assume the app lives at `/home/display/desk-display` and runs as the `display` user.
+The files in `deploy/` provide a production systemd service, Chromium kiosk launcher, and an optional midnight-to-08:00 physical backlight schedule. This guide deliberately uses a non-root `display` account, keeps the web server bound to localhost, and stores API credentials in an owner-only file.
 
-Build before copying the app:
+The supplied service files assume all of the following:
+
+- The Linux username is `display`.
+- The repository lives at `/home/display/desk-display`.
+- Node.js is installed system-wide at `/usr/bin/node`.
+- Raspberry Pi OS starts a desktop session automatically for `display`.
+
+If you use a different username or path, update all occurrences in `deploy/desk-display.service`, `deploy/desk-display.desktop`, and the configuration helpers before installing them.
+
+### 1. Prepare Raspberry Pi OS
+
+Use 64-bit Raspberry Pi OS with Desktop. In Raspberry Pi Imager, create the `display` user, choose a strong password, configure Wi-Fi if needed, and enable SSH with a public key when possible. After the first boot:
 
 ```sh
+sudo apt update
+sudo apt full-upgrade -y
+sudo apt install -y chromium curl git x11-xserver-utils
+sudo raspi-config
+```
+
+In `raspi-config`, enable **Desktop Autologin** for the `display` user. Set the correct local timezone as well; both the in-app night mode and the physical backlight timer use the Pi's local clock.
+
+This project requires Node.js 22.12 or newer. Install a current system-wide Node.js release, then verify both the version and path before continuing:
+
+```sh
+node --version
+command -v node
+npm --version
+```
+
+`command -v node` must print `/usr/bin/node` for the supplied systemd service. If it does not, either install Node system-wide or update `ExecStart` in `deploy/desk-display.service` to the absolute path printed on your Pi.
+
+### 2. Clone and build
+
+Run these commands as the `display` user, not as root:
+
+```sh
+cd /home/display
+git clone https://github.com/mezotv/desk-display.git
+cd desk-display
+npm ci --ignore-scripts
 npm run build
 ```
 
-Install `deploy/desk-display.service` as `/etc/systemd/system/desk-display.service`, install `deploy/desk-display-kiosk.sh` as `/home/display/.local/bin/desk-display-kiosk`, and add `deploy/desk-display.desktop` to the desktop session's autostart directory.
+`--ignore-scripts` skips the contributor-only Effect source checkout and agent-skill installation. They are useful during development but unnecessary on a production Pi.
+
+### 3. Configure secrets safely
+
+Create the environment file with owner-only permissions before editing it:
+
+```sh
+cd /home/display/desk-display
+install -m 600 .env.example .env
+nano .env
+```
+
+Replace every credential placeholder you intend to use, and delete unused integration entries instead of leaving fake credentials in place. Keep these rules:
+
+- Use a restricted Stripe key with read access only to the resources described above. Do not use a full-access secret key.
+- Keep `.env` owned by `display` with mode `600`.
+- Never commit `.env`, OAuth refresh tokens, or copied logs containing credentials.
+- Keep the server on `127.0.0.1`. Do not change `HOST` to `0.0.0.0` unless you put an authenticated reverse proxy in front of it.
+
+Confirm the file permissions without printing its contents:
+
+```sh
+stat -c '%U %G %a %n' .env
+```
+
+The expected result begins with `display display 600`.
+
+### 4. Install and start the app service
+
+Install the systemd unit as root, reload systemd, and start the app:
+
+```sh
+cd /home/display/desk-display
+sudo install -o root -g root -m 644 deploy/desk-display.service /etc/systemd/system/desk-display.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now desk-display.service
+```
+
+The service runs Node as `display`, binds only to `127.0.0.1:3000`, starts after networking, and restarts automatically after a crash. Verify it before configuring Chromium:
+
+```sh
+systemctl status desk-display.service --no-pager
+curl --fail http://127.0.0.1:3000/logos/system-pixel.svg >/dev/null
+```
+
+If either command fails, inspect the recent logs:
+
+```sh
+journalctl -u desk-display.service -n 100 --no-pager
+```
+
+### 5. Start Chromium automatically
+
+Install the launcher and desktop autostart entry as the `display` user:
+
+```sh
+install -D -m 755 deploy/desk-display-kiosk.sh /home/display/.local/bin/desk-display-kiosk
+install -D -m 644 deploy/desk-display.desktop /home/display/.config/autostart/desk-display.desktop
+sudo reboot
+```
+
+After the desktop session starts, the launcher waits for the local health endpoint and then opens Chromium in kiosk mode. If Chromium exits or crashes, the launcher starts it again. Check it over SSH with:
+
+```sh
+pgrep -af chromium
+curl --fail http://127.0.0.1:3000/ >/dev/null
+```
+
+### 6. Enable the physical backlight schedule safely
+
+This step is optional and hardware-specific. The supplied script expects the tested Waveshare backlight at `/sys/class/backlight/10-0045`. Do not enable the timer until that directory exists on your Pi:
+
+```sh
+timedatectl
+find /sys/class/backlight -mindepth 1 -maxdepth 1 -type l -printf '%f\n'
+```
+
+If your backlight has a different name, edit `BACKLIGHT_DIRECTORY` near the top of `deploy/desk-display-schedule.sh` before installing it. If `/sys/class/backlight` contains no suitable device, skip this section; in-app Night Mode will still dim the interface without touching hardware.
+
+Once the path and timezone are correct, install and enable the schedule:
+
+```sh
+cd /home/display/desk-display
+sudo install -o root -g root -m 755 deploy/desk-display-schedule.sh /usr/local/sbin/desk-display-schedule
+sudo install -o root -g root -m 644 deploy/desk-display-schedule.service /etc/systemd/system/desk-display-schedule.service
+sudo install -o root -g root -m 644 deploy/desk-display-schedule.timer /etc/systemd/system/desk-display-schedule.timer
+sudo systemctl daemon-reload
+sudo systemctl enable --now desk-display-schedule.timer
+sudo systemctl start desk-display-schedule.service
+```
+
+Run the final command from SSH: if the current local time is between midnight and 08:00, it intentionally sets the panel brightness to zero. The timer has `Persistent=true`, so systemd applies a missed transition after the Pi was powered off. Verify both upcoming events and the last schedule run:
+
+```sh
+systemctl list-timers desk-display-schedule.timer --all --no-pager
+systemctl status desk-display-schedule.service --no-pager
+```
+
+The hardware schedule turns the backlight fully off from 00:00 to 08:00. The separate in-app Night Mode defaults to dimming the UI from 21:00 to 08:00 and can be adjusted from Settings.
+
+### Updating an installed Pi
+
+Do not rebuild or restart the app as root. Pull only fast-forward updates, build as `display`, and restart only after the build succeeds:
+
+```sh
+cd /home/display/desk-display
+git pull --ff-only
+npm ci --ignore-scripts
+npm run build
+sudo systemctl restart desk-display.service
+curl --fail http://127.0.0.1:3000/logos/system-pixel.svg >/dev/null
+```
+
+If an update fails, stop before restarting the service and inspect the build output. Keep `.env` in place; `git pull` and `npm ci` do not replace it. Before unplugging or moving the Pi, shut it down cleanly with `sudo systemctl poweroff` and wait for disk activity to stop.
 
 ## Reliability model
 
@@ -84,4 +235,4 @@ External integrations use Effect for typed errors, schema validation, request ti
 
 ## License
 
-A license has not been selected yet. Choose one before publishing the repository publicly.
+Desk Display is available under the MIT License. See `LICENSE`.
