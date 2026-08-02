@@ -17,8 +17,6 @@ export type AppId =
   | "calendar"
   | "timer"
   | "stopwatch"
-  | "tasks"
-  | "notes"
   | "world"
   | "daylight"
   | "moon"

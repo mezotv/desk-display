@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   DEFAULT_PRODUCTIVITY_STATE,
-  MAX_DISPLAY_TASKS,
   MAX_TIMER_DURATION_MS,
   MIN_TIMER_DURATION_MS,
 } from "@/constants/productivity";
@@ -143,61 +142,6 @@ export function useProductivity(): UseProductivityResult {
     }));
   }, [updateState]);
 
-  const addTask = useCallback(
-    (title: string) => {
-      updateState((currentState) => {
-        if (currentState.tasks.length >= MAX_DISPLAY_TASKS) {
-          return currentState;
-        }
-
-        return {
-          ...currentState,
-          tasks: [
-            ...currentState.tasks,
-            { completed: false, id: window.crypto.randomUUID(), title },
-          ],
-        };
-      });
-    },
-    [updateState],
-  );
-
-  const toggleTask = useCallback(
-    (taskId: string) => {
-      updateState((currentState) => ({
-        ...currentState,
-        tasks: currentState.tasks.map((task) =>
-          task.id === taskId ? { ...task, completed: !task.completed } : task,
-        ),
-      }));
-    },
-    [updateState],
-  );
-
-  const deleteTask = useCallback(
-    (taskId: string) => {
-      updateState((currentState) => ({
-        ...currentState,
-        tasks: currentState.tasks.filter((task) => task.id !== taskId),
-      }));
-    },
-    [updateState],
-  );
-
-  const clearCompletedTasks = useCallback(() => {
-    updateState((currentState) => ({
-      ...currentState,
-      tasks: currentState.tasks.filter((task) => !task.completed),
-    }));
-  }, [updateState]);
-
-  const updateNote = useCallback(
-    (note: string) => {
-      updateState((currentState) => ({ ...currentState, note }));
-    },
-    [updateState],
-  );
-
   const dismissTimerFinished = useCallback(() => {
     setTimerFinished(false);
   }, []);
@@ -228,10 +172,7 @@ export function useProductivity(): UseProductivityResult {
   }, [ready, state.timer.endsAt, state.timer.running, updateState]);
 
   return {
-    addTask,
     changeTimerDuration,
-    clearCompletedTasks,
-    deleteTask,
     dismissTimerFinished,
     pauseTimer,
     ready,
@@ -241,7 +182,5 @@ export function useProductivity(): UseProductivityResult {
     state,
     timerFinished,
     toggleStopwatch,
-    toggleTask,
-    updateNote,
   };
 }

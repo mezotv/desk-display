@@ -6,11 +6,9 @@ import { AppLauncher } from "@/components/app-launcher";
 import { AlarmApp } from "@/components/alarm-app";
 import { AlarmRinging } from "@/components/alarm-ringing";
 import { BootLoader } from "@/components/boot-loader";
-import { NotesApp } from "@/components/notes-app";
 import { SettingsApp } from "@/components/settings-app";
 import { ScreenProtection } from "@/components/screen-protection";
 import { StopwatchApp } from "@/components/stopwatch-app";
-import { TasksApp } from "@/components/tasks-app";
 import { TimerApp } from "@/components/timer-app";
 import { TimerFinished } from "@/components/timer-finished";
 import { BOOT_LOADER_MINIMUM_MS } from "@/constants/boot";
@@ -77,10 +75,7 @@ export function DeskDisplay({
   const [system, setSystem] = useState(initialSystem);
   const [weather, setWeather] = useState(initialWeather);
   const {
-    addTask,
     changeTimerDuration,
-    clearCompletedTasks,
-    deleteTask,
     dismissTimerFinished,
     pauseTimer,
     ready: productivityReady,
@@ -90,8 +85,6 @@ export function DeskDisplay({
     state: productivity,
     timerFinished,
     toggleStopwatch,
-    toggleTask,
-    updateNote,
   } = useProductivity();
   const refreshMrr = useServerFn(getMrr);
   const refreshCalendar = useServerFn(getCalendar);
@@ -510,41 +503,6 @@ export function DeskDisplay({
           onReset={resetStopwatch}
           onToggle={toggleStopwatch}
           stopwatch={productivity.stopwatch}
-        />
-      </ScreenProtection>
-    );
-  }
-
-  if (activeApp === "tasks") {
-    return (
-      <ScreenProtection
-        enabled={settings.oledProtection}
-        nightModeActive={nightModeActive}
-      >
-        <TasksApp
-          language={settings.language}
-          onAdd={addTask}
-          onClearCompleted={clearCompletedTasks}
-          onDelete={deleteTask}
-          onHome={openLauncher}
-          onToggle={toggleTask}
-          tasks={productivity.tasks}
-        />
-      </ScreenProtection>
-    );
-  }
-
-  if (activeApp === "notes") {
-    return (
-      <ScreenProtection
-        enabled={settings.oledProtection}
-        nightModeActive={nightModeActive}
-      >
-        <NotesApp
-          language={settings.language}
-          note={productivity.note}
-          onChange={updateNote}
-          onHome={openLauncher}
         />
       </ScreenProtection>
     );

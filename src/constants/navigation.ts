@@ -9,8 +9,6 @@ export const APP_IDS = [
   "calendar",
   "timer",
   "stopwatch",
-  "tasks",
-  "notes",
   "world",
   "daylight",
   "moon",

@@ -1,9 +1,6 @@
 import { Schema } from "effect";
 
 import {
-  MAX_DISPLAY_TASKS,
-  MAX_NOTE_LENGTH,
-  MAX_TASK_LENGTH,
   MAX_TIMER_DURATION_MS,
 } from "@/constants/productivity";
 
@@ -34,16 +31,8 @@ const stopwatchSchema = Schema.Struct({
   startedAt: timestampSchema,
 });
 
-const taskSchema = Schema.Struct({
-  completed: Schema.Boolean,
-  id: Schema.NonEmptyString,
-  title: Schema.NonEmptyString.check(Schema.isMaxLength(MAX_TASK_LENGTH)),
-});
-
 export const productivityStateSchema = Schema.Struct({
-  note: Schema.String.check(Schema.isMaxLength(MAX_NOTE_LENGTH)),
   stopwatch: stopwatchSchema,
-  tasks: Schema.Array(taskSchema).check(Schema.isMaxLength(MAX_DISPLAY_TASKS)),
   timer: timerSchema,
 });
 

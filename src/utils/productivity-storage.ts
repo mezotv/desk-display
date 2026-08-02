@@ -14,10 +14,7 @@ export function loadProductivityState(): ProductivityState {
   try {
     const decoded = decodeProductivityState(JSON.parse(storedValue));
     if (Option.isSome(decoded)) {
-      return {
-        ...decoded.value,
-        tasks: [...decoded.value.tasks],
-      };
+      return decoded.value;
     }
   } catch {
     // Invalid persisted state is replaced with safe defaults below.

@@ -50,18 +50,6 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     label: { de: "STOPPUHR", en: "STOPWATCH" },
   },
   {
-    accent: "#34d399",
-    icon: "/logos/tasks-pixel.svg",
-    id: "tasks",
-    label: { de: "AUFGABEN", en: "TASKS" },
-  },
-  {
-    accent: "#facc15",
-    icon: "/logos/notes-pixel.svg",
-    id: "notes",
-    label: { de: "NOTIZ", en: "NOTE" },
-  },
-  {
     accent: "#60a5fa",
     icon: "/logos/world-pixel.svg",
     id: "world",

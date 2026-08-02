@@ -77,9 +77,6 @@ export function ActiveApp({
       ? productivity.stopwatch.elapsedMs +
         Math.max(0, now.getTime() - Date.parse(productivity.stopwatch.startedAt))
       : productivity.stopwatch.elapsedMs;
-  const openTaskCount = productivity.tasks.filter(
-    (task) => !task.completed,
-  ).length;
   const marqueeCardCount =
     5 +
     Number(showMarqueeWeather) +
@@ -87,9 +84,7 @@ export function ActiveApp({
     Number(showMarqueeSpotify) +
     Number(Boolean(daylight)) +
     Number(productivity.timer.running) +
-    Number(productivity.stopwatch.running) +
-    Number(openTaskCount > 0) +
-    Number(Boolean(productivity.note));
+    Number(productivity.stopwatch.running);
 
   return (
     <main className="relative grid h-dvh min-h-0 w-full overflow-hidden bg-display-bg">
@@ -359,22 +354,6 @@ export function ActiveApp({
                       icon="/logos/stopwatch-pixel.svg"
                       primary={formatDuration(stopwatchElapsedMs)}
                       secondary={productivityCopy.stopwatch}
-                    />
-                  )}
-                  {openTaskCount > 0 && (
-                    <MarqueeCard
-                      accent="#34d399"
-                      icon="/logos/tasks-pixel.svg"
-                      primary={String(openTaskCount)}
-                      secondary={productivityCopy.tasks}
-                    />
-                  )}
-                  {productivity.note && (
-                    <MarqueeCard
-                      accent="#facc15"
-                      icon="/logos/notes-pixel.svg"
-                      primary={productivity.note}
-                      secondary={productivityCopy.note}
                     />
                   )}
                   <MarqueeCard
