@@ -1,0 +1,12 @@
+[Unit]
+Description=Apply the Desk Display overnight backlight schedule
+Wants=time-sync.target
+After=time-sync.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/desk-display-schedule
+
+[Install]
+WantedBy=multi-user.target
+

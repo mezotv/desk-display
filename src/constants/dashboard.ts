@@ -1,0 +1,3 @@
+export const DASHBOARD_REFRESH_INTERVAL_MS = 60_000
+export const DEMO_MRR_MINOR = 10_000_000
+export const FALLBACK_CURRENCY = 'eur'

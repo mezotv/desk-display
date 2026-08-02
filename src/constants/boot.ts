@@ -1,0 +1,1 @@
+export const BOOT_LOADER_MINIMUM_MS = 1_000;

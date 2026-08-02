@@ -1,0 +1,13 @@
+[Unit]
+Description=Update the Desk Display backlight at midnight and 08:00
+
+[Timer]
+OnCalendar=*-*-* 00:00:00
+OnCalendar=*-*-* 08:00:00
+AccuracySec=1s
+Persistent=true
+Unit=desk-display-schedule.service
+
+[Install]
+WantedBy=timers.target
+

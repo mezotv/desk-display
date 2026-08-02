@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "jsdocs": {
+      "source": "Effect-TS/effect",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/jsdocs/SKILL.md",
+      "computedHash": "e9f6254dd4d0e379c875ea993c5bdc83819286ea3420e22529222688decfcc29"
+    },
+    "scratchpad": {
+      "source": "Effect-TS/effect",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/scratchpad/SKILL.md",
+      "computedHash": "ab2ca45eeaf8a1c129ddaa0f84b0e1a44060fcf7dd5cb94e367975abc7899437"
+    }
+  }
+}

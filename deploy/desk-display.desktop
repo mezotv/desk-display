@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Desk Display
+Comment=Open Desk Display in kiosk mode
+Exec=/home/display/.local/bin/desk-display-kiosk
+Terminal=false
+X-GNOME-Autostart-enabled=true
+
