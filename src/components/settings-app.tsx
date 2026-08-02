@@ -47,10 +47,17 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
         </button>
       </header>
 
-      <div className="no-scrollbar grid min-h-0 min-w-0 touch-pan-y auto-rows-[minmax(150px,1fr)] grid-cols-2 gap-[clamp(8px,1.4vw,14px)] overflow-x-hidden overflow-y-auto pr-1 [grid-template-rows:none] [overscroll-behavior-y:contain] [-webkit-overflow-scrolling:touch] [@media(min-width:700px)]:grid-cols-3 [@media(max-width:620px)_and_(orientation:portrait)]:auto-rows-[minmax(158px,auto)] [@media(max-width:620px)_and_(orientation:portrait)]:grid-cols-1 [@media(max-width:620px)_and_(orientation:portrait)]:pr-0.5">
+      <div
+        className="no-scrollbar grid min-h-0 min-w-0 touch-pan-x snap-x snap-mandatory grid-flow-col grid-rows-1 gap-[clamp(10px,1.6vw,18px)] overflow-x-auto overflow-y-hidden scroll-smooth pb-0.5 [grid-auto-columns:clamp(360px,58vw,620px)] [overscroll-behavior-x:contain] [-webkit-overflow-scrolling:touch] [&>section]:snap-start max-[620px]:[grid-auto-columns:88vw]"
+        onWheel={(event) => {
+          if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+            event.currentTarget.scrollLeft += event.deltaY;
+          }
+        }}
+      >
         <UpdatePanel language={settings.language} />
 
-        <section className="grid min-h-0 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3">
+        <section className="grid min-h-0 grid-cols-1 grid-rows-[auto_auto] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3">
           <span className="self-center text-[clamp(24px,min(3vw,5vh),36px)] font-bold leading-none tracking-[0.07em] text-[#7f7f8b] max-[620px]:text-[clamp(17px,5.5vw,22px)]">
             {copy.name}
           </span>
@@ -63,11 +70,11 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
           </button>
         </section>
 
-        <section className="grid min-h-0 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3">
+        <section className="grid min-h-0 grid-cols-1 grid-rows-[auto_auto] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3">
           <span className="self-center text-[clamp(24px,min(3vw,5vh),36px)] font-bold leading-none tracking-[0.07em] text-[#7f7f8b] max-[620px]:text-[clamp(17px,5.5vw,22px)]">
             {copy.language}
           </span>
-          <div className="grid h-16 grid-cols-2 gap-1.5">
+          <div className="grid h-[clamp(76px,15vh,110px)] grid-cols-2 gap-1.5">
             <button
               className={`flex min-w-0 touch-manipulation items-center justify-center gap-1.5 overflow-hidden rounded-[10px] border-0 px-1.5 text-[clamp(15px,min(2.1vw,3.5vh),24px)] font-bold outline-none active:scale-[0.97] ${
                 settings.language === "de"
@@ -103,7 +110,7 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
           </div>
         </section>
 
-        <section className="grid min-h-0 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3">
+        <section className="grid min-h-0 grid-cols-1 grid-rows-[auto_auto] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3">
           <span className="self-center text-[clamp(24px,min(3vw,5vh),36px)] font-bold leading-none tracking-[0.07em] text-[#7f7f8b] max-[620px]:text-[clamp(17px,5.5vw,22px)]">
             {copy.oledProtection}
             <small className="mt-[5px] block text-[13px] font-semibold tracking-[0.04em] text-[#52525d] [@media(max-width:620px)_and_(orientation:portrait)]:mt-1 [@media(max-width:620px)_and_(orientation:portrait)]:text-[clamp(11px,3vw,13px)]">
@@ -130,7 +137,7 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
         </section>
 
         <section
-          className="grid min-h-0 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3"
+          className="grid min-h-0 grid-cols-1 grid-rows-[auto_auto] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3"
           data-night-panel
         >
           <span className="self-center text-[clamp(24px,min(3vw,5vh),36px)] font-bold leading-none tracking-[0.07em] text-[#7f7f8b] max-[620px]:text-[clamp(17px,5.5vw,22px)]">

@@ -86,7 +86,7 @@ export function UpdatePanel({ language }: UpdatePanelProps) {
 
   return (
     <section
-      className="grid min-h-[150px] grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] content-center items-stretch gap-[clamp(7px,1.2vh,11px)] rounded-[14px] bg-display-panel px-[clamp(12px,1.6vw,22px)] py-[clamp(10px,1.6vh,16px)] [@media(max-width:620px)_and_(orientation:portrait)]:p-3"
+      className="grid min-h-[150px] grid-cols-1 grid-rows-[auto_auto_auto] content-center items-stretch gap-[clamp(7px,1.2vh,11px)] rounded-[14px] bg-display-panel px-[clamp(12px,1.6vw,22px)] py-[clamp(10px,1.6vh,16px)] [@media(max-width:620px)_and_(orientation:portrait)]:p-3"
       data-update-panel
     >
       <div className="flex items-start justify-between gap-3">
