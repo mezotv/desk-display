@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { ALARM_COPY, MAX_ALARMS } from "@/constants/alarm";
 import type {
@@ -61,13 +61,9 @@ export function AlarmApp({
 }: AlarmAppProps) {
   const [draft, setDraft] = useState<AlarmDraft | null>(null);
   const copy = ALARM_COPY[language];
-  const sortedAlarms = useMemo(
-    () =>
-      [...alarms].sort(
-        (left, right) =>
-          Date.parse(left.scheduledAt) - Date.parse(right.scheduledAt),
-      ),
-    [alarms],
+  const sortedAlarms = [...alarms].sort(
+    (left, right) =>
+      Date.parse(left.scheduledAt) - Date.parse(right.scheduledAt),
   );
 
   if (draft) {

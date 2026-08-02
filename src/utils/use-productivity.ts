@@ -15,7 +15,7 @@ import {
   saveProductivityState,
 } from "@/utils/productivity-storage";
 
-export function useProductivity(now: Date): UseProductivityResult {
+export function useProductivity(): UseProductivityResult {
   const [state, setState] = useState(() =>
     structuredClone(DEFAULT_PRODUCTIVITY_STATE),
   );
@@ -206,19 +206,26 @@ export function useProductivity(now: Date): UseProductivityResult {
     if (!ready || !state.timer.running || !state.timer.endsAt) return;
 
     const endsAt = Date.parse(state.timer.endsAt);
-    if (Number.isNaN(endsAt) || endsAt > now.getTime()) return;
+    if (Number.isNaN(endsAt)) return;
 
-    updateState((currentState) => ({
-      ...currentState,
-      timer: {
-        ...currentState.timer,
-        endsAt: null,
-        remainingMs: 0,
-        running: false,
+    const completionTimer = window.setTimeout(
+      () => {
+        updateState((currentState) => ({
+          ...currentState,
+          timer: {
+            ...currentState.timer,
+            endsAt: null,
+            remainingMs: 0,
+            running: false,
+          },
+        }));
+        setTimerFinished(true);
       },
-    }));
-    setTimerFinished(true);
-  }, [now, ready, state.timer, updateState]);
+      Math.max(0, endsAt - Date.now()),
+    );
+
+    return () => window.clearTimeout(completionTimer);
+  }, [ready, state.timer.endsAt, state.timer.running, updateState]);
 
   return {
     addTask,

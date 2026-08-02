@@ -66,7 +66,6 @@ export function DeskDisplay({
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [alarmsReady, setAlarmsReady] = useState(false);
   const [bootDelayElapsed, setBootDelayElapsed] = useState(false);
-  const [ringingAlarmId, setRingingAlarmId] = useState<string | null>(null);
   const [launcherOpen, setLauncherOpen] = useState(false);
   const [navigationReady, setNavigationReady] = useState(false);
   const [now, setNow] = useState(() => new Date());
@@ -93,7 +92,7 @@ export function DeskDisplay({
     toggleStopwatch,
     toggleTask,
     updateNote,
-  } = useProductivity(now);
+  } = useProductivity();
   const refreshMrr = useServerFn(getMrr);
   const refreshCalendar = useServerFn(getCalendar);
   const refreshSpotify = useServerFn(getSpotify);
@@ -111,7 +110,23 @@ export function DeskDisplay({
   }, []);
 
   useEffect(() => {
-    setAlarms(loadAlarms());
+    const storedAlarms = loadAlarms();
+    const staleAlarmCutoff = Date.now() - ALARM_TRIGGER_GRACE_MS;
+    const alarmsWithExpiredEntriesDisabled = storedAlarms.map((alarm) =>
+      alarm.enabled && Date.parse(alarm.scheduledAt) < staleAlarmCutoff
+        ? { ...alarm, enabled: false }
+        : alarm,
+    );
+
+    if (
+      alarmsWithExpiredEntriesDisabled.some(
+        (alarm, index) => alarm !== storedAlarms[index],
+      )
+    ) {
+      saveAlarms(alarmsWithExpiredEntriesDisabled);
+    }
+
+    setAlarms(alarmsWithExpiredEntriesDisabled);
     setAlarmsReady(true);
   }, []);
 
@@ -130,12 +145,6 @@ export function DeskDisplay({
     setNavigationReady(true);
   }, []);
 
-  useEffect(() => {
-    if (!navigationReady) return;
-
-    saveNavigation({ activeApp, launcherOpen });
-  }, [activeApp, launcherOpen, navigationReady]);
-
   const updateSettings = useCallback((nextSettings: DisplaySettings) => {
     setSettings(nextSettings);
     saveDisplaySettings(nextSettings);
@@ -148,6 +157,25 @@ export function DeskDisplay({
       return nextAlarms;
     });
   }, []);
+
+  const nowTimestamp = now.getTime();
+  const ringingAlarm = alarms.reduce<Alarm | undefined>(
+    (earliestDueAlarm, alarm) => {
+      const scheduledTimestamp = Date.parse(alarm.scheduledAt);
+      const isDue =
+        alarm.enabled &&
+        scheduledTimestamp <= nowTimestamp &&
+        scheduledTimestamp >= nowTimestamp - ALARM_TRIGGER_GRACE_MS;
+
+      if (!isDue) return earliestDueAlarm;
+      if (!earliestDueAlarm) return alarm;
+
+      return scheduledTimestamp < Date.parse(earliestDueAlarm.scheduledAt)
+        ? alarm
+        : earliestDueAlarm;
+    },
+    undefined,
+  );
 
   const addAlarm = useCallback(
     (scheduledAt: string) => {
@@ -172,9 +200,6 @@ export function DeskDisplay({
       updateAlarms((currentAlarms) =>
         currentAlarms.filter((alarm) => alarm.id !== alarmId),
       );
-      setRingingAlarmId((currentId) =>
-        currentId === alarmId ? null : currentId,
-      );
     },
     [updateAlarms],
   );
@@ -193,15 +218,25 @@ export function DeskDisplay({
   );
 
   const dismissAlarm = useCallback(() => {
-    if (!ringingAlarmId) return;
+    if (!ringingAlarm) return;
 
     updateAlarms((currentAlarms) =>
       currentAlarms.map((alarm) =>
-        alarm.id === ringingAlarmId ? { ...alarm, enabled: false } : alarm,
+        alarm.id === ringingAlarm.id ? { ...alarm, enabled: false } : alarm,
       ),
     );
-    setRingingAlarmId(null);
-  }, [ringingAlarmId, updateAlarms]);
+  }, [ringingAlarm, updateAlarms]);
+
+  const openLauncher = useCallback(() => {
+    setLauncherOpen(true);
+    saveNavigation({ activeApp, launcherOpen: true });
+  }, [activeApp]);
+
+  const launchApp = useCallback((appId: AppId) => {
+    setActiveApp(appId);
+    setLauncherOpen(false);
+    saveNavigation({ activeApp: appId, launcherOpen: false });
+  }, []);
 
   const updateMrr = useCallback(async () => {
     try {
@@ -310,53 +345,6 @@ export function DeskDisplay({
     isSystemVisible,
   );
 
-  useEffect(() => {
-    if (!alarmsReady) return;
-
-    const nowTimestamp = now.getTime();
-    const existingRingingAlarm = alarms.find(
-      (alarm) => alarm.id === ringingAlarmId,
-    );
-
-    if (ringingAlarmId && !existingRingingAlarm) {
-      setRingingAlarmId(null);
-      return;
-    }
-
-    const dueAlarm = alarms
-      .filter((alarm) => {
-        const scheduledTimestamp = Date.parse(alarm.scheduledAt);
-        return (
-          alarm.enabled &&
-          scheduledTimestamp <= nowTimestamp &&
-          scheduledTimestamp >= nowTimestamp - ALARM_TRIGGER_GRACE_MS
-        );
-      })
-      .sort(
-        (left, right) =>
-          Date.parse(left.scheduledAt) - Date.parse(right.scheduledAt),
-      )[0];
-
-    if (!ringingAlarmId && dueAlarm) setRingingAlarmId(dueAlarm.id);
-
-    if (
-      alarms.some(
-        (alarm) =>
-          alarm.enabled &&
-          Date.parse(alarm.scheduledAt) < nowTimestamp - ALARM_TRIGGER_GRACE_MS,
-      )
-    ) {
-      updateAlarms((currentAlarms) =>
-        currentAlarms.map((alarm) =>
-          alarm.enabled &&
-          Date.parse(alarm.scheduledAt) < nowTimestamp - ALARM_TRIGGER_GRACE_MS
-            ? { ...alarm, enabled: false }
-            : alarm,
-        ),
-      );
-    }
-  }, [alarms, alarmsReady, now, ringingAlarmId, updateAlarms]);
-
   const isAnnual = metricPeriod === "arr";
   const nightModeActive = isNightModeActive(
     now,
@@ -392,10 +380,9 @@ export function DeskDisplay({
         window.location.assign("/api/google-calendar/login");
       }
     },
-    () => setLauncherOpen(true),
+    openLauncher,
   );
 
-  const ringingAlarm = alarms.find((alarm) => alarm.id === ringingAlarmId);
   const startupReady =
     alarmsReady && navigationReady && productivityReady && bootDelayElapsed;
 
@@ -449,10 +436,7 @@ export function DeskDisplay({
           language={settings.language}
           name={settings.name}
           now={now}
-          onLaunch={(appId) => {
-            setActiveApp(appId);
-            setLauncherOpen(false);
-          }}
+          onLaunch={launchApp}
           weatherIcon={weatherIcon}
         />
       </ScreenProtection>
@@ -467,7 +451,7 @@ export function DeskDisplay({
       >
         <SettingsApp
           onChange={updateSettings}
-          onHome={() => setLauncherOpen(true)}
+          onHome={openLauncher}
           settings={settings}
         />
       </ScreenProtection>
@@ -486,7 +470,7 @@ export function DeskDisplay({
           now={now}
           onAdd={addAlarm}
           onDelete={deleteAlarm}
-          onHome={() => setLauncherOpen(true)}
+          onHome={openLauncher}
           onToggle={toggleAlarm}
         />
       </ScreenProtection>
@@ -503,7 +487,7 @@ export function DeskDisplay({
           language={settings.language}
           now={now}
           onChangeDuration={changeTimerDuration}
-          onHome={() => setLauncherOpen(true)}
+          onHome={openLauncher}
           onPause={pauseTimer}
           onReset={resetTimer}
           onStart={startTimer}
@@ -522,7 +506,7 @@ export function DeskDisplay({
         <StopwatchApp
           language={settings.language}
           now={now}
-          onHome={() => setLauncherOpen(true)}
+          onHome={openLauncher}
           onReset={resetStopwatch}
           onToggle={toggleStopwatch}
           stopwatch={productivity.stopwatch}
@@ -542,7 +526,7 @@ export function DeskDisplay({
           onAdd={addTask}
           onClearCompleted={clearCompletedTasks}
           onDelete={deleteTask}
-          onHome={() => setLauncherOpen(true)}
+          onHome={openLauncher}
           onToggle={toggleTask}
           tasks={productivity.tasks}
         />
@@ -560,7 +544,7 @@ export function DeskDisplay({
           language={settings.language}
           note={productivity.note}
           onChange={updateNote}
-          onHome={() => setLauncherOpen(true)}
+          onHome={openLauncher}
         />
       </ScreenProtection>
     );
