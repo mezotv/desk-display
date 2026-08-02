@@ -1,3 +1,4 @@
+import { VersionReloadGuard } from "@/components/version-reload-guard";
 import type { ScreenProtectionProps } from "@/types/settings";
 
 export function ScreenProtection({
@@ -15,6 +16,7 @@ export function ScreenProtection({
 
   return (
     <div className={classes} data-night-mode-active={nightModeActive}>
+      <VersionReloadGuard />
       {children}
     </div>
   );

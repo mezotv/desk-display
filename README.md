@@ -16,7 +16,7 @@ The app is built with React, TanStack Start, Effect, and Tailwind CSS v4. The in
 - Day, week, month, and year progress
 - Raspberry Pi temperature, uptime, CPU, memory, and network status
 - A dynamic slider that includes connected integrations and useful active local apps
-- Touch settings, German and English UI, Night Mode, and OLED pixel shifting
+- Touch settings, stable release updates, German and English UI, Night Mode, and OLED pixel shifting
 
 Timer, stopwatch, navigation, alarm, and display-setting state is stored locally in the kiosk browser. It survives application and Pi restarts without sending personal content to another service.
 
@@ -213,7 +213,28 @@ pgrep -af chromium
 curl --fail http://127.0.0.1:3000/ >/dev/null
 ```
 
-### 6. Enable the physical backlight schedule safely
+### 6. Enable automatic stable updates
+
+Install the updater timer once after the main service is running:
+
+```sh
+cd /home/display/desk-display
+./deploy/install-updater.sh
+```
+
+The timer checks the latest stable GitHub Release after boot and then every six hours, with a randomized delay to avoid every display contacting GitHub simultaneously. It calls a loopback-only update endpoint; the web server performs the update as the unprivileged `display` user. You can also check and install immediately from the Software Update panel in Settings.
+
+Verify the schedule and trigger a check without waiting:
+
+```sh
+systemctl list-timers desk-display-update.timer --all --no-pager
+sudo systemctl start desk-display-update.service
+journalctl -u desk-display-update.service -n 50 --no-pager
+```
+
+An update is downloaded from the immutable tagged release URL, checked against the SHA-256 digest in the latest release manifest, validated, and extracted into a staging directory. Desk Display then swaps `.output` atomically, keeps the previous build as `.output.rollback`, and restarts through the existing systemd crash-restart policy. `.env` and browser-local settings are never included in or replaced by a release.
+
+### 7. Enable the physical backlight schedule safely
 
 This step is optional and hardware-specific. The supplied script expects the tested Waveshare backlight at `/sys/class/backlight/10-0045`. Do not enable the timer until that directory exists on your Pi:
 
@@ -247,18 +268,30 @@ The hardware schedule turns the backlight fully off from 00:00 to 08:00. The sep
 
 ### Updating an installed Pi
 
-Do not rebuild or restart the app as root. Pull only fast-forward updates, build as `display`, and restart only after the build succeeds:
+For normal updates, open Settings and tap **Software Update**, or let `desk-display-update.timer` install the next stable release automatically. The display reloads itself after the local server restarts.
+
+The source checkout does not need to follow `main` for release updates because the Pi runs the prebuilt `.output` bundle. To update deployment helpers or contributor source files as well, fast-forward the checkout separately:
 
 ```sh
 cd /home/display/desk-display
 git pull --ff-only
-npm ci --ignore-scripts
-npm run build
-sudo systemctl restart desk-display.service
-curl --fail http://127.0.0.1:3000/logos/system-pixel.svg >/dev/null
 ```
 
-If an update fails, stop before restarting the service and inspect the build output. Keep `.env` in place; `git pull` and `npm ci` do not replace it. Before unplugging or moving the Pi, shut it down cleanly with `sudo systemctl poweroff` and wait for disk activity to stop.
+If an update fails, the running build remains active and Settings shows the failure. Inspect `journalctl -u desk-display.service -n 100 --no-pager`; the updater never modifies `.env`. Before unplugging or moving the Pi, shut it down cleanly with `sudo systemctl poweroff` and wait for disk activity to stop.
+
+## Publishing a release
+
+Stable Pi updates are produced only from semantic version tags. Maintainers should bump the same version in `package.json` and `package-lock.json`, commit it, and push the tag:
+
+```sh
+npm version 0.3.0 --no-git-tag-version
+git add package.json package-lock.json
+git commit -m "chore: release 0.3.0"
+git tag -a v0.3.0 -m "Desk Display 0.3.0"
+git push origin main v0.3.0
+```
+
+The release workflow builds on GitHub, packages the production output, creates a SHA-256 manifest, and publishes both files to GitHub Releases. Drafts, prereleases, branches, and untagged commits are never installed automatically. The updater uses GitHub's stable `/releases/latest/download/…` link for the manifest and the immutable versioned tag URL for the verified build archive.
 
 ## Reliability model
 

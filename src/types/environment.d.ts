@@ -1,5 +1,8 @@
+declare const __DESK_DISPLAY_VERSION__: string;
+
 declare namespace NodeJS {
   interface ProcessEnv {
+    readonly DESK_DISPLAY_ROOT?: string;
     readonly DISPLAY_CURRENCY?: string;
     readonly DISPLAY_LANGUAGE?: "de" | "en";
     readonly DISPLAY_NAME?: string;

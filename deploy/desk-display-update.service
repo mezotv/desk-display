@@ -1,0 +1,15 @@
+[Unit]
+Description=Install the latest stable Desk Display release
+Wants=network-online.target
+After=network-online.target desk-display.service
+
+[Service]
+Type=oneshot
+User=display
+Group=display
+ExecStart=/usr/bin/curl --fail-with-body --silent --show-error --max-time 1200 --request POST http://127.0.0.1:3000/api/update/install
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=strict
+TimeoutStartSec=20min

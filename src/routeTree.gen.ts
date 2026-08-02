@@ -15,6 +15,8 @@ import { Route as ApiGoogleCalendarCallbackRouteImport } from './routes/api/goog
 import { Route as ApiGoogleCalendarLoginRouteImport } from './routes/api/google-calendar/login'
 import { Route as ApiSpotifyCallbackRouteImport } from './routes/api/spotify/callback'
 import { Route as ApiSpotifyLoginRouteImport } from './routes/api/spotify/login'
+import { Route as ApiUpdateInstallRouteImport } from './routes/api/update/install'
+import { Route as ApiUpdateVersionRouteImport } from './routes/api/update/version'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -47,6 +49,16 @@ const ApiSpotifyLoginRoute = ApiSpotifyLoginRouteImport.update({
   path: '/api/spotify/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUpdateInstallRoute = ApiUpdateInstallRouteImport.update({
+  id: '/api/update/install',
+  path: '/api/update/install',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUpdateVersionRoute = ApiUpdateVersionRouteImport.update({
+  id: '/api/update/version',
+  path: '/api/update/version',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -55,6 +67,8 @@ export interface FileRoutesByFullPath {
   '/api/google-calendar/login': typeof ApiGoogleCalendarLoginRoute
   '/api/spotify/callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify/login': typeof ApiSpotifyLoginRoute
+  '/api/update/install': typeof ApiUpdateInstallRoute
+  '/api/update/version': typeof ApiUpdateVersionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -63,6 +77,8 @@ export interface FileRoutesByTo {
   '/api/google-calendar/login': typeof ApiGoogleCalendarLoginRoute
   '/api/spotify/callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify/login': typeof ApiSpotifyLoginRoute
+  '/api/update/install': typeof ApiUpdateInstallRoute
+  '/api/update/version': typeof ApiUpdateVersionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -72,6 +88,8 @@ export interface FileRoutesById {
   '/api/google-calendar/login': typeof ApiGoogleCalendarLoginRoute
   '/api/spotify/callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify/login': typeof ApiSpotifyLoginRoute
+  '/api/update/install': typeof ApiUpdateInstallRoute
+  '/api/update/version': typeof ApiUpdateVersionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -82,6 +100,8 @@ export interface FileRouteTypes {
     | '/api/google-calendar/login'
     | '/api/spotify/callback'
     | '/api/spotify/login'
+    | '/api/update/install'
+    | '/api/update/version'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -90,6 +110,8 @@ export interface FileRouteTypes {
     | '/api/google-calendar/login'
     | '/api/spotify/callback'
     | '/api/spotify/login'
+    | '/api/update/install'
+    | '/api/update/version'
   id:
     | '__root__'
     | '/'
@@ -98,6 +120,8 @@ export interface FileRouteTypes {
     | '/api/google-calendar/login'
     | '/api/spotify/callback'
     | '/api/spotify/login'
+    | '/api/update/install'
+    | '/api/update/version'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -107,6 +131,8 @@ export interface RootRouteChildren {
   ApiGoogleCalendarLoginRoute: typeof ApiGoogleCalendarLoginRoute
   ApiSpotifyCallbackRoute: typeof ApiSpotifyCallbackRoute
   ApiSpotifyLoginRoute: typeof ApiSpotifyLoginRoute
+  ApiUpdateInstallRoute: typeof ApiUpdateInstallRoute
+  ApiUpdateVersionRoute: typeof ApiUpdateVersionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -153,6 +179,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSpotifyLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/update/install': {
+      id: '/api/update/install'
+      path: '/api/update/install'
+      fullPath: '/api/update/install'
+      preLoaderRoute: typeof ApiUpdateInstallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/update/version': {
+      id: '/api/update/version'
+      path: '/api/update/version'
+      fullPath: '/api/update/version'
+      preLoaderRoute: typeof ApiUpdateVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -163,6 +203,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGoogleCalendarLoginRoute: ApiGoogleCalendarLoginRoute,
   ApiSpotifyCallbackRoute: ApiSpotifyCallbackRoute,
   ApiSpotifyLoginRoute: ApiSpotifyLoginRoute,
+  ApiUpdateInstallRoute: ApiUpdateInstallRoute,
+  ApiUpdateVersionRoute: ApiUpdateVersionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

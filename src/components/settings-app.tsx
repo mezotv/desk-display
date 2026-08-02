@@ -3,6 +3,7 @@ import { useState } from "react";
 import { TouchKeyboard } from "@/components/touch-keyboard";
 import { NightTimeControl } from "@/components/night-time-control";
 import { PixelatedImage } from "@/components/pixelated-image";
+import { UpdatePanel } from "@/components/update-panel";
 import { LOCALIZED_COPY } from "@/constants/settings";
 import type { SettingsAppProps } from "@/types/settings";
 
@@ -46,7 +47,7 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
         </button>
       </header>
 
-      <div className="grid min-h-0 min-w-0 grid-cols-2 grid-rows-2 gap-[clamp(8px,1.4vw,14px)] [@media(max-width:620px)_and_(orientation:portrait)]:auto-rows-[minmax(158px,auto)] [@media(max-width:620px)_and_(orientation:portrait)]:grid-cols-1 [@media(max-width:620px)_and_(orientation:portrait)]:[grid-template-rows:none] [@media(max-width:620px)_and_(orientation:portrait)]:touch-pan-y [@media(max-width:620px)_and_(orientation:portrait)]:overflow-x-hidden [@media(max-width:620px)_and_(orientation:portrait)]:overflow-y-auto [@media(max-width:620px)_and_(orientation:portrait)]:pr-0.5">
+      <div className="no-scrollbar grid min-h-0 min-w-0 touch-pan-y auto-rows-[minmax(150px,1fr)] grid-cols-2 gap-[clamp(8px,1.4vw,14px)] overflow-x-hidden overflow-y-auto pr-1 [grid-template-rows:none] [@media(min-width:1100px)_and_(min-height:650px)]:grid-cols-3 [@media(max-width:620px)_and_(orientation:portrait)]:auto-rows-[minmax(158px,auto)] [@media(max-width:620px)_and_(orientation:portrait)]:grid-cols-1 [@media(max-width:620px)_and_(orientation:portrait)]:pr-0.5">
         <section className="grid min-h-0 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] content-center items-stretch gap-[clamp(8px,1.5vh,13px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:gap-2 [@media(max-width:620px)_and_(orientation:portrait)]:p-3">
           <span className="self-center text-[clamp(24px,min(3vw,5vh),36px)] font-bold leading-none tracking-[0.07em] text-[#7f7f8b] max-[620px]:text-[clamp(17px,5.5vw,22px)]">
             {copy.name}
@@ -172,6 +173,8 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
             </div>
           </div>
         </section>
+
+        <UpdatePanel language={settings.language} />
       </div>
     </main>
   );

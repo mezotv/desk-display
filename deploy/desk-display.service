@@ -11,6 +11,7 @@ WorkingDirectory=/home/display/desk-display
 Environment=NODE_ENV=production
 Environment=HOST=127.0.0.1
 Environment=PORT=3000
+Environment=DESK_DISPLAY_ROOT=/home/display/desk-display
 EnvironmentFile=-/home/display/desk-display/.env
 ExecStart=/usr/bin/node /home/display/desk-display/.output/server/index.mjs
 Restart=always
@@ -18,4 +19,3 @@ RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
-
