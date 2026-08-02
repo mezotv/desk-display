@@ -62,6 +62,18 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     label: { de: "TIC TAC TOE", en: "TIC TAC TOE" },
   },
   {
+    accent: "#af5cf6",
+    icon: "/logos/pong-pixel.svg",
+    id: "pong",
+    label: { de: "PONG", en: "PONG" },
+  },
+  {
+    accent: "#f59e0b",
+    icon: "/logos/brick-breaker-pixel.svg",
+    id: "brick-breaker",
+    label: { de: "BRICK BREAKER", en: "BRICK BREAKER" },
+  },
+  {
     accent: "#60a5fa",
     icon: "/logos/world-pixel.svg",
     id: "world",

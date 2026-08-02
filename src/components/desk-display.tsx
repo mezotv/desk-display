@@ -6,6 +6,8 @@ import { AppLauncher } from "@/components/app-launcher";
 import { AlarmApp } from "@/components/alarm-app";
 import { AlarmRinging } from "@/components/alarm-ringing";
 import { BootLoader } from "@/components/boot-loader";
+import { BrickBreakerApp } from "@/components/brick-breaker-app";
+import { PongApp } from "@/components/pong-app";
 import { SettingsApp } from "@/components/settings-app";
 import { ScreenProtection } from "@/components/screen-protection";
 import { StopwatchApp } from "@/components/stopwatch-app";
@@ -549,6 +551,31 @@ export function DeskDisplay({
         nightModeActive={nightModeActive}
       >
         <TicTacToeApp
+          language={settings.language}
+          onHome={openLauncher}
+        />
+      </ScreenProtection>
+    );
+  }
+
+  if (activeApp === "pong") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <PongApp language={settings.language} onHome={openLauncher} />
+      </ScreenProtection>
+    );
+  }
+
+  if (activeApp === "brick-breaker") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <BrickBreakerApp
           language={settings.language}
           onHome={openLauncher}
         />

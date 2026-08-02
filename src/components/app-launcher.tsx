@@ -4,7 +4,7 @@ import { LOCALIZED_COPY } from "@/constants/settings";
 import type { AppLauncherProps } from "@/types/apps";
 import { formatClockTime } from "@/utils/format-clock";
 import { getGreeting } from "@/utils/get-greeting";
-import { useRef } from "react";
+import { useHorizontalDragScroll } from "@/utils/use-horizontal-drag-scroll";
 
 export function AppLauncher({
   language,
@@ -14,61 +14,9 @@ export function AppLauncher({
   twitterConfigured,
   weatherIcon,
 }: AppLauncherProps) {
-  const dragState = useRef({
-    frameId: 0,
-    lastAt: 0,
-    lastX: 0,
-    moved: false,
-    nextScrollLeft: 0,
-    pointerId: -1,
-    scrollLeft: 0,
-    startX: 0,
-    velocity: 0,
-  });
-  const suppressClick = useRef(false);
+  const horizontalDragScroll = useHorizontalDragScroll("[data-launcher-app]");
   const greeting = getGreeting(now, language);
   const homeGreeting = name ? `${greeting}, ${name}` : greeting;
-
-  const finishDrag = (
-    event: React.PointerEvent<HTMLDivElement>,
-    cancelled = false,
-  ) => {
-    if (dragState.current.pointerId !== event.pointerId) return;
-
-    const grid = event.currentTarget;
-
-    if (dragState.current.frameId) {
-      window.cancelAnimationFrame(dragState.current.frameId);
-      grid.scrollLeft = dragState.current.nextScrollLeft;
-      dragState.current.frameId = 0;
-    }
-
-    if (dragState.current.moved && !cancelled) {
-      const firstApp = grid.querySelector<HTMLElement>("[data-launcher-app]");
-      const columnWidth = (firstApp?.offsetWidth ?? 0) + 14;
-      const projectedLeft =
-        grid.scrollLeft - dragState.current.velocity * 180;
-      const maxScrollLeft = grid.scrollWidth - grid.clientWidth;
-      const targetLeft = columnWidth
-        ? Math.round(projectedLeft / columnWidth) * columnWidth
-        : projectedLeft;
-
-      grid.scrollTo({
-        behavior: "smooth",
-        left: Math.max(0, Math.min(maxScrollLeft, targetLeft)),
-      });
-    }
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-
-    delete grid.dataset.dragging;
-    dragState.current.pointerId = -1;
-    window.setTimeout(() => {
-      suppressClick.current = false;
-    }, 0);
-  };
 
   return (
     <main className="relative grid h-dvh min-h-0 w-full grid-rows-[clamp(42px,6.5vh,72px)_minmax(0,1fr)_clamp(18px,3vh,28px)] gap-[clamp(6px,1.25vh,14px)] overflow-hidden bg-display-bg px-[clamp(18px,4.5vw,72px)] pt-[clamp(12px,2.5vh,28px)] pb-[clamp(8px,1.7vh,20px)] max-[620px]:px-3">
@@ -82,70 +30,7 @@ export function AppLauncher({
       </header>
       <div
         className="no-scrollbar grid min-h-0 w-full cursor-grab touch-none grid-flow-col grid-rows-2 gap-x-[var(--launcher-column-gap)] gap-y-[clamp(10px,2vh,20px)] overflow-x-auto overflow-y-hidden scroll-smooth pb-0.5 [--launcher-column-gap:clamp(14px,1.75vw,28px)] [grid-auto-columns:calc((100%_-_(3_*_var(--launcher-column-gap)))_/_4)] [overscroll-behavior-x:contain] [-webkit-overflow-scrolling:touch] data-[dragging=true]:cursor-grabbing data-[dragging=true]:scroll-auto [@media(min-width:1100px)_and_(min-height:650px)]:[grid-auto-columns:calc((100%_-_(4_*_var(--launcher-column-gap)))_/_5)] max-[620px]:[--launcher-column-gap:10px] max-[620px]:[grid-auto-columns:calc((100%_-_var(--launcher-column-gap))_/_2)] [@media(max-width:620px)_and_(orientation:landscape)]:[grid-auto-columns:calc((100%_-_(2_*_var(--launcher-column-gap)))_/_3)]"
-        onClickCapture={(event) => {
-          if (!suppressClick.current) return;
-
-          event.preventDefault();
-          event.stopPropagation();
-          suppressClick.current = false;
-        }}
-        onPointerCancel={(event) => finishDrag(event, true)}
-        onPointerDown={(event) => {
-          if (event.pointerType === "mouse" && event.button !== 0) return;
-
-          dragState.current = {
-            frameId: 0,
-            lastAt: event.timeStamp,
-            lastX: event.clientX,
-            moved: false,
-            nextScrollLeft: event.currentTarget.scrollLeft,
-            pointerId: event.pointerId,
-            scrollLeft: event.currentTarget.scrollLeft,
-            startX: event.clientX,
-            velocity: 0,
-          };
-        }}
-        onPointerMove={(event) => {
-          if (dragState.current.pointerId !== event.pointerId) return;
-
-          const distance = event.clientX - dragState.current.startX;
-          if (!dragState.current.moved && Math.abs(distance) < 6) return;
-
-          const grid = event.currentTarget;
-
-          if (!dragState.current.moved) {
-            grid.setPointerCapture(event.pointerId);
-            grid.dataset.dragging = "true";
-          }
-
-          event.preventDefault();
-          dragState.current.moved = true;
-          suppressClick.current = true;
-          dragState.current.nextScrollLeft =
-            dragState.current.scrollLeft - distance;
-
-          const elapsed = event.timeStamp - dragState.current.lastAt;
-          if (elapsed > 0) {
-            dragState.current.velocity =
-              (event.clientX - dragState.current.lastX) / elapsed;
-          }
-
-          dragState.current.lastAt = event.timeStamp;
-          dragState.current.lastX = event.clientX;
-
-          if (!dragState.current.frameId) {
-            dragState.current.frameId = window.requestAnimationFrame(() => {
-              grid.scrollLeft = dragState.current.nextScrollLeft;
-              dragState.current.frameId = 0;
-            });
-          }
-        }}
-        onPointerUp={finishDrag}
-        onWheel={(event) => {
-          if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-
-          event.currentTarget.scrollLeft += event.deltaY;
-        }}
+        {...horizontalDragScroll}
       >
         {APP_DEFINITIONS.filter(
           (app) => app.id !== "twitter" || twitterConfigured,

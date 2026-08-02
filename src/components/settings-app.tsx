@@ -50,7 +50,7 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
       </header>
 
       <div
-        className="no-scrollbar grid min-h-0 min-w-0 touch-none cursor-grab snap-x snap-mandatory grid-flow-col grid-rows-2 gap-[clamp(10px,1.6vw,18px)] overflow-x-auto overflow-y-hidden scroll-smooth pb-0.5 [grid-auto-columns:clamp(320px,42vw,440px)] [overscroll-behavior-x:contain] [-webkit-overflow-scrolling:touch] [&>section]:snap-start data-[dragging=true]:cursor-grabbing data-[dragging=true]:scroll-auto max-[620px]:[grid-auto-columns:88vw]"
+        className="no-scrollbar grid min-h-0 min-w-0 touch-none cursor-grab grid-flow-col grid-rows-2 gap-[clamp(10px,1.6vw,18px)] overflow-x-auto overflow-y-hidden scroll-smooth pb-0.5 [grid-auto-columns:clamp(320px,42vw,440px)] [overscroll-behavior-x:contain] [-webkit-overflow-scrolling:touch] data-[dragging=true]:cursor-grabbing data-[dragging=true]:scroll-auto max-[620px]:[grid-auto-columns:88vw]"
         {...horizontalDragScroll}
       >
         <UpdatePanel language={settings.language} />

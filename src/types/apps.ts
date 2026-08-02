@@ -20,6 +20,8 @@ export type AppId =
   | "timer"
   | "stopwatch"
   | "tic-tac-toe"
+  | "pong"
+  | "brick-breaker"
   | "world"
   | "daylight"
   | "moon"

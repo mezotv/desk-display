@@ -11,6 +11,8 @@ export const APP_IDS = [
   "timer",
   "stopwatch",
   "tic-tac-toe",
+  "pong",
+  "brick-breaker",
   "world",
   "daylight",
   "moon",
