@@ -18,6 +18,7 @@ export type AppId =
   | "calendar"
   | "twitter"
   | "timer"
+  | "pomodoro"
   | "stopwatch"
   | "tic-tac-toe"
   | "pong"

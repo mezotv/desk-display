@@ -7,6 +7,7 @@ import { AlarmApp } from "@/components/alarm-app";
 import { AlarmRinging } from "@/components/alarm-ringing";
 import { BootLoader } from "@/components/boot-loader";
 import { BrickBreakerApp } from "@/components/brick-breaker-app";
+import { PomodoroApp } from "@/components/pomodoro-app";
 import { PongApp } from "@/components/pong-app";
 import { SettingsApp } from "@/components/settings-app";
 import { ScreenProtection } from "@/components/screen-protection";
@@ -59,6 +60,7 @@ import { getWeatherIcon } from "@/utils/get-weather-icon";
 import { getWeather } from "@/utils/weather.functions";
 import { isNightModeActive } from "@/utils/night-mode-time";
 import { useProductivity } from "@/utils/use-productivity";
+import { usePomodoro } from "@/utils/use-pomodoro";
 
 export function DeskDisplay({
   initialCalendar,
@@ -97,6 +99,14 @@ export function DeskDisplay({
     timerFinished,
     toggleStopwatch,
   } = useProductivity();
+  const {
+    changeMode: changePomodoroMode,
+    changePlanDuration: changePomodoroPlanDuration,
+    ready: pomodoroReady,
+    reset: resetPomodoro,
+    state: pomodoro,
+    toggle: togglePomodoro,
+  } = usePomodoro();
   const refreshMrr = useServerFn(getMrr);
   const refreshCalendar = useServerFn(getCalendar);
   const refreshSpotify = useServerFn(getSpotify);
@@ -412,7 +422,11 @@ export function DeskDisplay({
   );
 
   const startupReady =
-    alarmsReady && navigationReady && productivityReady && bootDelayElapsed;
+    alarmsReady &&
+    navigationReady &&
+    productivityReady &&
+    pomodoroReady &&
+    bootDelayElapsed;
 
   if (!startupReady) {
     return (
@@ -521,6 +535,26 @@ export function DeskDisplay({
           onReset={resetTimer}
           onStart={startTimer}
           timer={productivity.timer}
+        />
+      </ScreenProtection>
+    );
+  }
+
+  if (activeApp === "pomodoro") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <PomodoroApp
+          language={settings.language}
+          now={now}
+          onChangeMode={changePomodoroMode}
+          onChangePlanDuration={changePomodoroPlanDuration}
+          onHome={openLauncher}
+          onReset={resetPomodoro}
+          onToggle={togglePomodoro}
+          pomodoro={pomodoro}
         />
       </ScreenProtection>
     );

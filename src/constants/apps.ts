@@ -50,6 +50,12 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     label: { de: "TIMER", en: "TIMER" },
   },
   {
+    accent: "#fb7185",
+    icon: "/logos/pomodoro-pixel.svg",
+    id: "pomodoro",
+    label: { de: "POMODORO", en: "POMODORO" },
+  },
+  {
     accent: "#22d3ee",
     icon: "/logos/stopwatch-pixel.svg",
     id: "stopwatch",
