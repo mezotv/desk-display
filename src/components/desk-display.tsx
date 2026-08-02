@@ -9,6 +9,7 @@ import { BootLoader } from "@/components/boot-loader";
 import { SettingsApp } from "@/components/settings-app";
 import { ScreenProtection } from "@/components/screen-protection";
 import { StopwatchApp } from "@/components/stopwatch-app";
+import { TicTacToeApp } from "@/components/tic-tac-toe-app";
 import { TimerApp } from "@/components/timer-app";
 import { TimerFinished } from "@/components/timer-finished";
 import { BOOT_LOADER_MINIMUM_MS } from "@/constants/boot";
@@ -536,6 +537,20 @@ export function DeskDisplay({
           onReset={resetStopwatch}
           onToggle={toggleStopwatch}
           stopwatch={productivity.stopwatch}
+        />
+      </ScreenProtection>
+    );
+  }
+
+  if (activeApp === "tic-tac-toe") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <TicTacToeApp
+          language={settings.language}
+          onHome={openLauncher}
         />
       </ScreenProtection>
     );

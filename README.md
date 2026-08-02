@@ -11,7 +11,7 @@ The app is built with React, TanStack Start, Effect, and Tailwind CSS v4. The in
 - Current weather and real local sunrise/sunset data
 - Google Calendar with upcoming events
 - Read-only X profile and touch-cycled 30-day analytics
-- Clock, world clock, alarms, countdown timer, and stopwatch
+- Clock, world clock, alarms, countdown timer, stopwatch, and touch Tic-Tac-Toe
 - Moon phase with dynamically rendered pixel illumination
 - Day, week, month, and year progress
 - Raspberry Pi temperature, uptime, CPU, memory, and network status

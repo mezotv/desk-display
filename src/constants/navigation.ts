@@ -10,6 +10,7 @@ export const APP_IDS = [
   "twitter",
   "timer",
   "stopwatch",
+  "tic-tac-toe",
   "world",
   "daylight",
   "moon",

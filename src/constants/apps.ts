@@ -56,6 +56,12 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     label: { de: "STOPPUHR", en: "STOPWATCH" },
   },
   {
+    accent: "#af5cf6",
+    icon: "/logos/tic-tac-toe-pixel.svg",
+    id: "tic-tac-toe",
+    label: { de: "TIC TAC TOE", en: "TIC TAC TOE" },
+  },
+  {
     accent: "#60a5fa",
     icon: "/logos/world-pixel.svg",
     id: "world",

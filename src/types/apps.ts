@@ -19,6 +19,7 @@ export type AppId =
   | "twitter"
   | "timer"
   | "stopwatch"
+  | "tic-tac-toe"
   | "world"
   | "daylight"
   | "moon"
