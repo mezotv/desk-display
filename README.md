@@ -241,28 +241,7 @@ pgrep -af chromium
 curl --fail http://127.0.0.1:3000/ >/dev/null
 ```
 
-### 6. Enable automatic stable updates
-
-Install the updater timer once after the main service is running:
-
-```sh
-cd /home/display/desk-display
-./deploy/install-updater.sh
-```
-
-The timer checks the latest stable GitHub Release after boot and then every six hours, with a randomized delay to avoid every display contacting GitHub simultaneously. It calls a loopback-only update endpoint; the web server performs the update as the unprivileged `display` user. You can also check and install immediately from the Software Update panel in Settings.
-
-Verify the schedule and trigger a check without waiting:
-
-```sh
-systemctl list-timers desk-display-update.timer --all --no-pager
-sudo systemctl start desk-display-update.service
-journalctl -u desk-display-update.service -n 50 --no-pager
-```
-
-An update is downloaded from the immutable tagged release URL, checked against the SHA-256 digest in the latest release manifest, validated, and extracted into a staging directory. Desk Display then swaps `.output` atomically, keeps the previous build as `.output.rollback`, and restarts through the existing systemd crash-restart policy. `.env` and browser-local settings are never included in or replaced by a release.
-
-### 7. Enable the physical backlight schedule safely
+### 6. Enable the physical backlight schedule safely
 
 This step is optional and hardware-specific. The supplied script expects the tested Waveshare backlight at `/sys/class/backlight/10-0045`. Do not enable the timer until that directory exists on your Pi:
 
@@ -296,9 +275,9 @@ The hardware schedule turns the backlight fully off from 00:00 to 08:00. The sep
 
 ### Updating an installed Pi
 
-For normal updates, open Settings and tap **Software Update**, or let `desk-display-update.timer` install the next stable release automatically. The display reloads itself after the local server restarts.
+Updates are manual. Open Settings, tap **Check** in the Software Update card, review the newest version, and tap **Install** if one is available. Desk Display never checks GitHub or installs a release in the background. The display reloads itself after the local server restarts.
 
-The Pi does not need a Git repository. Runtime updates always come from the newest stable, immutable GitHub Release and replace only the verified prebuilt `.output` bundle. Local credentials, browser settings, and the rollback bundle remain on the device.
+The Pi does not need a Git repository. A requested update comes from the newest stable, immutable GitHub Release, is checked against its SHA-256 release manifest, and replaces only the verified prebuilt `.output` bundle. The previous build remains available as `.output.rollback`; local credentials and browser settings remain on the device.
 
 If an update fails, the running build remains active and Settings shows the failure. Inspect `journalctl -u desk-display.service -n 100 --no-pager`; the updater never modifies `.env`. Before unplugging or moving the Pi, shut it down cleanly with `sudo systemctl poweroff` and wait for disk activity to stop.
 
@@ -314,7 +293,7 @@ git tag -a v0.3.0 -m "Desk Display 0.3.0"
 git push origin main v0.3.0
 ```
 
-The release workflow builds on GitHub, packages the production output, creates a SHA-256 manifest, and publishes both files to GitHub Releases. Drafts, prereleases, branches, and untagged commits are never installed automatically. The updater uses GitHub's stable `/releases/latest/download/…` link for the manifest and the immutable versioned tag URL for the verified build archive.
+The release workflow builds on GitHub, packages the production output, creates a SHA-256 manifest, and publishes both files to GitHub Releases. Drafts, prereleases, branches, and untagged commits are never offered by the manual update check. The updater uses GitHub's stable `/releases/latest/download/…` link for the manifest and the immutable versioned tag URL for the verified build archive.
 
 ## Reliability model
 

@@ -57,7 +57,7 @@ const installUpdateEffect = Effect.fn("DeskDisplayUpdate.install")(function*() {
   if (process.platform !== "linux") {
     return {
       currentVersion,
-      error: "Desk Display can install updates automatically on Linux only",
+      error: "Desk Display can install updates on Linux only",
       latestVersion: manifest.version,
       restartRequired: false,
       status: "failed",
