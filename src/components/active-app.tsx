@@ -36,7 +36,7 @@ export function ActiveApp({
   spotify,
   system,
   twitter,
-  twitterPostIndex,
+  twitterSlideIndex,
   weather,
   weatherIcon,
 }: ActiveAppProps) {
@@ -210,7 +210,7 @@ export function ActiveApp({
         {activeApp === "twitter" && (
           <TwitterApp
             language={language}
-            postIndex={twitterPostIndex}
+            slideIndex={twitterSlideIndex}
             twitter={twitter}
           />
         )}

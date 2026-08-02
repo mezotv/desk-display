@@ -46,7 +46,7 @@ export type ActiveAppProps = {
   spotify: SpotifySnapshot;
   system: SystemSnapshot;
   twitter: TwitterSnapshot;
-  twitterPostIndex: number;
+  twitterSlideIndex: number;
   weather: WeatherSnapshot;
   weatherIcon: string;
 };

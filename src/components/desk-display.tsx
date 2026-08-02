@@ -30,7 +30,10 @@ import {
   SYSTEM_ACTIVE_REFRESH_INTERVAL_MS,
   SYSTEM_BACKGROUND_REFRESH_INTERVAL_MS,
 } from "@/constants/system";
-import { TWITTER_REFRESH_INTERVAL_MS } from "@/constants/twitter";
+import {
+  TWITTER_ANALYTICS_SLIDE_COUNT,
+  TWITTER_REFRESH_INTERVAL_MS,
+} from "@/constants/twitter";
 import type { Alarm, AlarmUpdater } from "@/types/alarm";
 import type { AppId, DeskDisplayProps } from "@/types/apps";
 import type { DisplaySettings } from "@/types/settings";
@@ -77,7 +80,7 @@ export function DeskDisplay({
   const [spotify, setSpotify] = useState(initialSpotify);
   const [system, setSystem] = useState(initialSystem);
   const [twitter, setTwitter] = useState(initialTwitter);
-  const [twitterPostIndex, setTwitterPostIndex] = useState(0);
+  const [twitterSlideIndex, setTwitterSlideIndex] = useState(0);
   const [weather, setWeather] = useState(initialWeather);
   const {
     changeTimerDuration,
@@ -387,9 +390,10 @@ export function DeskDisplay({
         void toggleSpotify();
       }
 
-      if (activeApp === "twitter" && twitter.posts.length > 1) {
-        setTwitterPostIndex(
-          (postIndex) => (postIndex + 1) % twitter.posts.length,
+      if (activeApp === "twitter") {
+        setTwitterSlideIndex(
+          (slideIndex) =>
+            (slideIndex + 1) % TWITTER_ANALYTICS_SLIDE_COUNT,
         );
       }
 
@@ -554,7 +558,7 @@ export function DeskDisplay({
         spotify={spotify}
         system={system}
         twitter={twitter}
-        twitterPostIndex={twitterPostIndex}
+        twitterSlideIndex={twitterSlideIndex}
         weather={weather}
         weatherIcon={weatherIcon}
       />

@@ -10,7 +10,7 @@ The app is built with React, TanStack Start, Effect, and Tailwind CSS v4. The in
 - Spotify now playing, progress, and play/pause control
 - Current weather and real local sunrise/sunset data
 - Google Calendar with upcoming events
-- Read-only X profile, recent posts, and engagement metrics
+- Read-only X profile and touch-cycled 30-day analytics
 - Clock, world clock, alarms, countdown timer, and stopwatch
 - Moon phase with dynamically rendered pixel illumination
 - Day, week, month, and year progress
@@ -79,9 +79,11 @@ X_USERNAME=example
 X_BEARER_TOKEN=replace_me
 ```
 
-The X app is hidden until both values are configured. It displays the account's follower count and five most recent original posts with public reply, repost, like, and view metrics. Single-tap the app to move through the cached posts; double-tap to return to the launcher.
+The X app is hidden until both values are configured. It cycles through the account's follower count, impressions on posts published in the last 30 days, engagement rate and totals, and a daily post-impression chart. Single-tap anywhere to move between analytics screens; double-tap to return to the launcher.
 
-Desk Display caches X responses on the server for two hours, limiting automatic upstream refreshes to at most 12 per day. X bills reads per returned resource and normally deduplicates the same resource within a UTC day. Set a small monthly spending limit in the X Developer Console and consult [current X API pricing](https://docs.x.com/x-api/getting-started/pricing) before enabling the integration.
+The current bearer-token integration uses public metrics from original posts, excluding replies and reposts. Its 30-day impression figure is therefore the sum of current impressions on original posts published during that window, not X's private historical account-impression series. The chart groups those impressions by each post's publication date.
+
+Desk Display requests at most 100 authored posts and caches X responses on the server for six hours, limiting automatic upstream refreshes to four per day. X bills reads per returned resource and normally deduplicates the same resource within a UTC day. Set a small monthly spending limit in the X Developer Console and consult [current X API pricing](https://docs.x.com/x-api/getting-started/pricing) before enabling the integration.
 
 ## OLED protection
 

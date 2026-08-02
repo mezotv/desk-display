@@ -32,7 +32,6 @@ export const twitterPostsResponseSchema = Schema.Struct({
         created_at: Schema.optionalKey(Schema.String),
         id: Schema.String,
         public_metrics: Schema.optionalKey(twitterPostMetricsSchema),
-        text: Schema.String,
       }),
     ),
   ),

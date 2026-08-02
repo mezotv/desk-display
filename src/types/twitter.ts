@@ -9,11 +9,22 @@ export type TwitterPostMetrics = {
   repostCount: number;
 };
 
-export type TwitterPost = {
+export type TwitterAnalyticsPost = {
   createdAt: string | null;
-  id: string;
   metrics: TwitterPostMetrics;
-  text: string;
+};
+
+export type TwitterDailyImpressions = {
+  date: string;
+  impressionCount: number;
+  postCount: number;
+};
+
+export type TwitterAnalytics = TwitterPostMetrics & {
+  dailyImpressions: TwitterDailyImpressions[];
+  engagementCount: number;
+  engagementRate: number;
+  postCount: number;
 };
 
 export type TwitterSnapshot = {
@@ -21,7 +32,7 @@ export type TwitterSnapshot = {
   error: string | null;
   followerCount: number | null;
   name: string | null;
-  posts: TwitterPost[];
+  analytics: TwitterAnalytics;
   profileImageUrl: string | null;
   updatedAt: string;
   username: string | null;
@@ -34,6 +45,10 @@ export type TwitterCacheEntry = {
 
 export type TwitterAppProps = {
   language: DisplayLanguage;
-  postIndex: number;
+  slideIndex: number;
   twitter: TwitterSnapshot;
+};
+
+export type TwitterImpressionsChartProps = {
+  dailyImpressions: TwitterDailyImpressions[];
 };

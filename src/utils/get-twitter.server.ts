@@ -16,9 +16,14 @@ import {
 } from "@/schemas/twitter";
 import { serverRuntime } from "@/runtime/server-runtime";
 import type {
+  TwitterAnalyticsPost,
   TwitterCacheEntry,
   TwitterSnapshot,
 } from "@/types/twitter";
+import {
+  getTwitterAnalytics,
+  getTwitterAnalyticsStartTime,
+} from "@/utils/get-twitter-analytics";
 import { requestExternalJson } from "@/utils/request-external-api.server";
 
 let twitterCache: TwitterCacheEntry | null = null;
@@ -33,7 +38,7 @@ function emptyTwitterSnapshot(
     error,
     followerCount: null,
     name: null,
-    posts: [],
+    analytics: getTwitterAnalytics([], Date.now()),
     profileImageUrl: null,
     updatedAt: new Date().toISOString(),
     username,
@@ -105,6 +110,7 @@ const getTwitterSnapshotEffect = Effect.fn("Twitter.getSnapshot")(
     const postsUrl = new URL(`${TWITTER_API_URL}/users/${user.id}/tweets`);
     postsUrl.searchParams.set("exclude", "replies,retweets");
     postsUrl.searchParams.set("max_results", String(TWITTER_POST_LIMIT));
+    postsUrl.searchParams.set("start_time", getTwitterAnalyticsStartTime(now));
     postsUrl.searchParams.set("tweet.fields", "created_at,public_metrics");
     const postsRequest = HttpClientRequest.get(postsUrl).pipe(
       HttpClientRequest.setHeader("authorization", `Bearer ${bearerToken}`),
@@ -127,14 +133,9 @@ const getTwitterSnapshotEffect = Effect.fn("Twitter.getSnapshot")(
             }),
       ),
     );
-    const snapshot = {
-      configured: true,
-      error: null,
-      followerCount: user.public_metrics?.followers_count ?? null,
-      name: user.name,
-      posts: (postsPayload.data ?? []).map((post) => ({
+    const posts = (postsPayload.data ?? []).map(
+      (post): TwitterAnalyticsPost => ({
         createdAt: post.created_at ?? null,
-        id: post.id,
         metrics: {
           bookmarkCount: post.public_metrics?.bookmark_count ?? 0,
           impressionCount: post.public_metrics?.impression_count ?? 0,
@@ -143,8 +144,14 @@ const getTwitterSnapshotEffect = Effect.fn("Twitter.getSnapshot")(
           replyCount: post.public_metrics?.reply_count ?? 0,
           repostCount: post.public_metrics?.retweet_count ?? 0,
         },
-        text: post.text,
-      })),
+      }),
+    );
+    const snapshot = {
+      analytics: getTwitterAnalytics(posts, now),
+      configured: true,
+      error: null,
+      followerCount: user.public_metrics?.followers_count ?? null,
+      name: user.name,
       profileImageUrl:
         user.profile_image_url?.replace("_normal.", "_400x400.") ?? null,
       updatedAt: DateTime.formatIso(yield* DateTime.now),
