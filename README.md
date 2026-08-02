@@ -104,7 +104,7 @@ The files in `deploy/` provide a production systemd service, Chromium kiosk laun
 The supplied service files assume all of the following:
 
 - The Linux username is `display`.
-- The repository lives at `/home/display/desk-display`.
+- Desk Display is installed at `/home/display/desk-display`.
 - Node.js is installed system-wide at `/usr/bin/node`.
 - Raspberry Pi OS starts a desktop session automatically for `display`.
 
@@ -117,7 +117,7 @@ Use 64-bit Raspberry Pi OS with Desktop. In Raspberry Pi Imager, create the `dis
 ```sh
 sudo apt update
 sudo apt full-upgrade -y
-sudo apt install -y chromium curl git x11-xserver-utils
+sudo apt install -y chromium curl x11-xserver-utils
 sudo raspi-config
 ```
 
@@ -133,19 +133,47 @@ npm --version
 
 `command -v node` must print `/usr/bin/node` for the supplied systemd service. If it does not, either install Node system-wide or update `ExecStart` in `deploy/desk-display.service` to the absolute path printed on your Pi.
 
-### 2. Clone and build
+### 2. Install the latest release without Git
 
 Run these commands as the `display` user, not as root:
 
 ```sh
-cd /home/display
-git clone https://github.com/mezotv/desk-display.git
-cd desk-display
-npm ci --ignore-scripts
-npm run build
+install_root=/home/display/desk-display
+release_temp="$(mktemp -d)"
+trap 'rm -rf "$release_temp"' EXIT HUP INT TERM
+
+curl --fail --location --retry 3 \
+  https://github.com/mezotv/desk-display/releases/latest/download/desk-display-release.json \
+  --output "$release_temp/manifest.json"
+
+release_version="$(node -e '
+  const manifest = require(process.argv[1])
+  if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) process.exit(1)
+  process.stdout.write(manifest.version)
+' "$release_temp/manifest.json")"
+release_checksum="$(node -e '
+  const manifest = require(process.argv[1])
+  if (!/^[a-f0-9]{64}$/.test(manifest.sha256)) process.exit(1)
+  process.stdout.write(manifest.sha256)
+' "$release_temp/manifest.json")"
+
+test ! -e "$install_root"
+mkdir "$install_root"
+
+curl --fail --location --retry 3 \
+  "https://github.com/mezotv/desk-display/archive/refs/tags/v$release_version.tar.gz" \
+  --output "$release_temp/source.tar.gz"
+tar -xzf "$release_temp/source.tar.gz" --strip-components=1 -C "$install_root"
+
+curl --fail --location --retry 3 \
+  "https://github.com/mezotv/desk-display/releases/download/v$release_version/desk-display-$release_version.tar.gz" \
+  --output "$release_temp/app.tar.gz"
+printf '%s  %s\n' "$release_checksum" "$release_temp/app.tar.gz" | sha256sum --check
+tar -xzf "$release_temp/app.tar.gz" -C "$install_root"
+printf '%s\n' "$release_version" > "$install_root/.desk-display-version"
 ```
 
-`--ignore-scripts` skips the contributor-only Effect source checkout and agent-skill installation. They are useful during development but unnecessary on a production Pi.
+This downloads the source snapshot for the matching immutable tag plus its prebuilt production bundle. It verifies the bundle against the release manifest before installing it. It does not run `git init`, create a `.git` directory, install npm packages, or compile the app on the Pi.
 
 ### 3. Configure secrets safely
 
@@ -270,12 +298,7 @@ The hardware schedule turns the backlight fully off from 00:00 to 08:00. The sep
 
 For normal updates, open Settings and tap **Software Update**, or let `desk-display-update.timer` install the next stable release automatically. The display reloads itself after the local server restarts.
 
-The source checkout does not need to follow `main` for release updates because the Pi runs the prebuilt `.output` bundle. To update deployment helpers or contributor source files as well, fast-forward the checkout separately:
-
-```sh
-cd /home/display/desk-display
-git pull --ff-only
-```
+The Pi does not need a Git repository. Runtime updates always come from the newest stable, immutable GitHub Release and replace only the verified prebuilt `.output` bundle. Local credentials, browser settings, and the rollback bundle remain on the device.
 
 If an update fails, the running build remains active and Settings shows the failure. Inspect `journalctl -u desk-display.service -n 100 --no-pager`; the updater never modifies `.env`. Before unplugging or moving the Pi, shut it down cleanly with `sudo systemctl poweroff` and wait for disk activity to stop.
 
