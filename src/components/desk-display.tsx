@@ -30,6 +30,7 @@ import {
   SYSTEM_ACTIVE_REFRESH_INTERVAL_MS,
   SYSTEM_BACKGROUND_REFRESH_INTERVAL_MS,
 } from "@/constants/system";
+import { TWITTER_REFRESH_INTERVAL_MS } from "@/constants/twitter";
 import type { Alarm, AlarmUpdater } from "@/types/alarm";
 import type { AppId, DeskDisplayProps } from "@/types/apps";
 import type { DisplaySettings } from "@/types/settings";
@@ -45,6 +46,7 @@ import { getCalendar } from "@/utils/google-calendar.functions";
 import { getMrr } from "@/utils/mrr.functions";
 import { getSpotify, setSpotifyPlayback } from "@/utils/spotify.functions";
 import { getSystem } from "@/utils/system.functions";
+import { getTwitter } from "@/utils/twitter.functions";
 import { useTapGesture } from "@/utils/use-tap-gesture";
 import { useRecurringRefresh } from "@/utils/use-recurring-refresh";
 import { getWeatherIcon } from "@/utils/get-weather-icon";
@@ -58,6 +60,7 @@ export function DeskDisplay({
   initialSettings,
   initialSpotify,
   initialSystem,
+  initialTwitter,
   initialWeather,
 }: DeskDisplayProps) {
   const [activeApp, setActiveApp] = useState<AppId>("stripe");
@@ -73,6 +76,8 @@ export function DeskDisplay({
   const [settings, setSettings] = useState(initialSettings);
   const [spotify, setSpotify] = useState(initialSpotify);
   const [system, setSystem] = useState(initialSystem);
+  const [twitter, setTwitter] = useState(initialTwitter);
+  const [twitterPostIndex, setTwitterPostIndex] = useState(0);
   const [weather, setWeather] = useState(initialWeather);
   const {
     changeTimerDuration,
@@ -91,6 +96,7 @@ export function DeskDisplay({
   const refreshSpotify = useServerFn(getSpotify);
   const controlSpotify = useServerFn(setSpotifyPlayback);
   const refreshSystem = useServerFn(getSystem);
+  const refreshTwitter = useServerFn(getTwitter);
   const refreshWeather = useServerFn(getWeather);
 
   useEffect(() => {
@@ -293,6 +299,15 @@ export function DeskDisplay({
     }
   }, [refreshSystem]);
 
+  const updateTwitter = useCallback(async () => {
+    try {
+      const nextTwitter = await refreshTwitter();
+      if (nextTwitter.configured) setTwitter(nextTwitter);
+    } catch (error) {
+      console.error("Unable to refresh X", error);
+    }
+  }, [refreshTwitter]);
+
   useEffect(() => {
     const clockInterval = window.setInterval(() => setNow(new Date()), 1_000);
     const mrrInterval = window.setInterval(
@@ -338,6 +353,13 @@ export function DeskDisplay({
     isSystemVisible,
   );
 
+  const isTwitterVisible = activeApp === "twitter" && !launcherOpen;
+  useRecurringRefresh(
+    updateTwitter,
+    TWITTER_REFRESH_INTERVAL_MS,
+    isTwitterVisible,
+  );
+
   const isAnnual = metricPeriod === "arr";
   const nightModeActive = isNightModeActive(
     now,
@@ -363,6 +385,12 @@ export function DeskDisplay({
 
       if (activeApp === "spotify" && spotify.configured) {
         void toggleSpotify();
+      }
+
+      if (activeApp === "twitter" && twitter.posts.length > 1) {
+        setTwitterPostIndex(
+          (postIndex) => (postIndex + 1) % twitter.posts.length,
+        );
       }
 
       if (
@@ -430,6 +458,7 @@ export function DeskDisplay({
           name={settings.name}
           now={now}
           onLaunch={launchApp}
+          twitterConfigured={twitter.configured}
           weatherIcon={weatherIcon}
         />
       </ScreenProtection>
@@ -524,6 +553,8 @@ export function DeskDisplay({
         productivity={productivity}
         spotify={spotify}
         system={system}
+        twitter={twitter}
+        twitterPostIndex={twitterPostIndex}
         weather={weather}
         weatherIcon={weatherIcon}
       />

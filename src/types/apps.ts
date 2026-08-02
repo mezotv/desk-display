@@ -6,6 +6,7 @@ import type { ProductivityState } from "@/types/productivity";
 import type { SpotifySnapshot } from "@/types/spotify";
 import type { DisplayLanguage, DisplaySettings } from "@/types/settings";
 import type { SystemSnapshot } from "@/types/system";
+import type { TwitterSnapshot } from "@/types/twitter";
 import type { WeatherSnapshot } from "@/types/weather";
 
 export type AppId =
@@ -15,6 +16,7 @@ export type AppId =
   | "clock"
   | "alarm"
   | "calendar"
+  | "twitter"
   | "timer"
   | "stopwatch"
   | "world"
@@ -43,6 +45,8 @@ export type ActiveAppProps = {
   productivity: ProductivityState;
   spotify: SpotifySnapshot;
   system: SystemSnapshot;
+  twitter: TwitterSnapshot;
+  twitterPostIndex: number;
   weather: WeatherSnapshot;
   weatherIcon: string;
 };
@@ -53,6 +57,7 @@ export type DeskDisplayProps = {
   initialSettings: DisplaySettings;
   initialSpotify: SpotifySnapshot;
   initialSystem: SystemSnapshot;
+  initialTwitter: TwitterSnapshot;
   initialWeather: WeatherSnapshot;
 };
 
@@ -61,6 +66,7 @@ export type AppLauncherProps = {
   name: string;
   now: Date;
   onLaunch: (appId: AppId) => void;
+  twitterConfigured: boolean;
   weatherIcon: string;
 };
 

@@ -10,6 +10,7 @@ The app is built with React, TanStack Start, Effect, and Tailwind CSS v4. The in
 - Spotify now playing, progress, and play/pause control
 - Current weather and real local sunrise/sunset data
 - Google Calendar with upcoming events
+- Read-only X profile, recent posts, and engagement metrics
 - Clock, world clock, alarms, countdown timer, and stopwatch
 - Moon phase with dynamically rendered pixel illumination
 - Day, week, month, and year progress
@@ -68,6 +69,19 @@ http://127.0.0.1:3000/api/google-calendar/callback
 ```
 
 Add `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET`, then tap Calendar to authorize. Desk Display requests read-only event access.
+
+### X
+
+Create an app in the [X Developer Console](https://console.x.com/), give it read-only access, and add its generated bearer token plus the account name without `@`:
+
+```text
+X_USERNAME=example
+X_BEARER_TOKEN=replace_me
+```
+
+The X app is hidden until both values are configured. It displays the account's follower count and five most recent original posts with public reply, repost, like, and view metrics. Single-tap the app to move through the cached posts; double-tap to return to the launcher.
+
+Desk Display caches X responses on the server for two hours, limiting automatic upstream refreshes to at most 12 per day. X bills reads per returned resource and normally deduplicates the same resource within a UTC day. Set a small monthly spending limit in the X Developer Console and consult [current X API pricing](https://docs.x.com/x-api/getting-started/pricing) before enabling the integration.
 
 ## OLED protection
 

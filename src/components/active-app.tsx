@@ -6,14 +6,17 @@ import { OverflowMarquee } from "@/components/overflow-marquee";
 import { PixelatedImage } from "@/components/pixelated-image";
 import { ProgressApp } from "@/components/progress-app";
 import { SystemApp } from "@/components/system-app";
+import { TwitterApp } from "@/components/twitter-app";
 import { WorldClockApp } from "@/components/world-clock-app";
 import { CALENDAR_COPY } from "@/constants/calendar";
 import { AMBIENT_COPY } from "@/constants/ambient";
 import { PRODUCTIVITY_COPY } from "@/constants/productivity";
 import { SPOTIFY_COPY } from "@/constants/spotify";
 import { SYSTEM_COPY } from "@/constants/system";
+import { TWITTER_COPY } from "@/constants/twitter";
 import type { ActiveAppProps } from "@/types/apps";
 import { formatClockDate, formatClockTime } from "@/utils/format-clock";
+import { formatCompactNumber } from "@/utils/format-compact-number";
 import { formatCurrency } from "@/utils/format-currency";
 import { formatDuration } from "@/utils/format-duration";
 import { formatPlaybackTime } from "@/utils/format-playback-time";
@@ -32,6 +35,8 @@ export function ActiveApp({
   productivity,
   spotify,
   system,
+  twitter,
+  twitterPostIndex,
   weather,
   weatherIcon,
 }: ActiveAppProps) {
@@ -58,11 +63,14 @@ export function ActiveApp({
   const ambientCopy = AMBIENT_COPY[language];
   const productivityCopy = PRODUCTIVITY_COPY[language];
   const systemCopy = SYSTEM_COPY[language];
+  const twitterCopy = TWITTER_COPY[language];
   const marqueeCalendarEvent = calendar.configured
     ? calendar.events[0]
     : undefined;
   const showMarqueeSpotify = spotify.configured && Boolean(spotify.track);
   const showMarqueeWeather = weather.temperatureCelsius !== null;
+  const showMarqueeTwitter =
+    twitter.configured && twitter.followerCount !== null;
   const daylight = getDaylightProgress(now, weather.sunrise, weather.sunset);
   const moon = getMoonPhase(now);
   const yearProgress = getTimeProgress(now).find(
@@ -82,6 +90,7 @@ export function ActiveApp({
     Number(showMarqueeWeather) +
     Number(Boolean(marqueeCalendarEvent)) +
     Number(showMarqueeSpotify) +
+    Number(showMarqueeTwitter) +
     Number(Boolean(daylight)) +
     Number(productivity.timer.running) +
     Number(productivity.stopwatch.running);
@@ -196,6 +205,14 @@ export function ActiveApp({
 
         {activeApp === "calendar" && (
           <CalendarApp calendar={calendar} language={language} now={now} />
+        )}
+
+        {activeApp === "twitter" && (
+          <TwitterApp
+            language={language}
+            postIndex={twitterPostIndex}
+            twitter={twitter}
+          />
         )}
 
         {activeApp === "clock" && (
@@ -331,6 +348,14 @@ export function ActiveApp({
                         )}
                       </div>
                     </section>
+                  )}
+                  {showMarqueeTwitter && (
+                    <MarqueeCard
+                      accent="#55acee"
+                      icon={twitter.profileImageUrl ?? "/logos/twitter.svg"}
+                      primary={formatCompactNumber(twitter.followerCount ?? 0)}
+                      secondary={twitterCopy.followers}
+                    />
                   )}
                   {daylight && (
                     <MarqueeCard

@@ -14,5 +14,7 @@ declare namespace NodeJS {
     readonly WEATHER_LATITUDE?: string;
     readonly WEATHER_LOCATION_LABEL?: string;
     readonly WEATHER_LONGITUDE?: string;
+    readonly X_BEARER_TOKEN?: string;
+    readonly X_USERNAME?: string;
   }
 }

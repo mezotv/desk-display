@@ -7,6 +7,7 @@ import { getMrr } from "@/utils/mrr.functions";
 import { getDisplaySettings } from "@/utils/settings.functions";
 import { getSpotify } from "@/utils/spotify.functions";
 import { getSystem } from "@/utils/system.functions";
+import { getTwitter } from "@/utils/twitter.functions";
 import { getWeather } from "@/utils/weather.functions";
 
 export const Route = createFileRoute("/")({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/")({
       initialSettings,
       initialSpotify,
       initialSystem,
+      initialTwitter,
       initialWeather,
     ] = await Promise.all([
       getCalendar(),
@@ -25,6 +27,7 @@ export const Route = createFileRoute("/")({
       getDisplaySettings(),
       getSpotify(),
       getSystem(),
+      getTwitter(),
       getWeather(),
     ]);
 
@@ -34,6 +37,7 @@ export const Route = createFileRoute("/")({
       initialSettings,
       initialSpotify,
       initialSystem,
+      initialTwitter,
       initialWeather,
     };
   },

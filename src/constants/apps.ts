@@ -38,6 +38,12 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     label: { de: "KALENDER", en: "CALENDAR" },
   },
   {
+    accent: "#55acee",
+    icon: "/logos/twitter.svg",
+    id: "twitter",
+    label: { de: "X", en: "X" },
+  },
+  {
     accent: "#f97316",
     icon: "/logos/timer-pixel.svg",
     id: "timer",

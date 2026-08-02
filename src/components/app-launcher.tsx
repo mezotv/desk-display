@@ -11,6 +11,7 @@ export function AppLauncher({
   name,
   now,
   onLaunch,
+  twitterConfigured,
   weatherIcon,
 }: AppLauncherProps) {
   const dragState = useRef({
@@ -146,7 +147,9 @@ export function AppLauncher({
           event.currentTarget.scrollLeft += event.deltaY;
         }}
       >
-        {APP_DEFINITIONS.map((app) => (
+        {APP_DEFINITIONS.filter(
+          (app) => app.id !== "twitter" || twitterConfigured,
+        ).map((app) => (
           <button
             className="grid min-w-0 touch-none cursor-pointer place-items-center rounded-[clamp(12px,1.5vw,18px)] border-0 bg-display-panel px-[clamp(8px,1vw,16px)] py-[clamp(6px,1.2vh,12px)] text-display-text outline-none [-webkit-tap-highlight-color:transparent] active:bg-[#18181f] focus-visible:shadow-[inset_0_0_0_3px_rgba(175,92,246,0.82)]"
             data-launcher-app

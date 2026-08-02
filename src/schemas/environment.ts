@@ -52,6 +52,13 @@ export const googleCalendarEnvironmentSchema = Schema.Struct({
   GOOGLE_CALENDAR_REFRESH_TOKEN: Schema.NonEmptyString,
 });
 
+export const twitterEnvironmentSchema = Schema.Struct({
+  X_BEARER_TOKEN: Schema.NonEmptyString,
+  X_USERNAME: Schema.String.check(
+    Schema.isPattern(/^[A-Za-z0-9_]{1,15}$/),
+  ),
+});
+
 export const decodeDisplayEnvironment = Schema.decodeUnknownOption(
   displayEnvironmentSchema,
 );
@@ -69,6 +76,9 @@ export const decodeSpotifyEnvironment = Schema.decodeUnknownOption(
 );
 export const decodeStripeEnvironment = Schema.decodeUnknownOption(
   stripeEnvironmentSchema,
+);
+export const decodeTwitterEnvironment = Schema.decodeUnknownOption(
+  twitterEnvironmentSchema,
 );
 export const decodeWeatherEnvironment = Schema.decodeUnknownOption(
   weatherEnvironmentSchema,
