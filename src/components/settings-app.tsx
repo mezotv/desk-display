@@ -6,10 +6,12 @@ import { PixelatedImage } from "@/components/pixelated-image";
 import { UpdatePanel } from "@/components/update-panel";
 import { LOCALIZED_COPY } from "@/constants/settings";
 import type { SettingsAppProps } from "@/types/settings";
+import { useHorizontalDragScroll } from "@/utils/use-horizontal-drag-scroll";
 
 export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
   const [editingName, setEditingName] = useState(false);
   const copy = LOCALIZED_COPY[settings.language];
+  const horizontalDragScroll = useHorizontalDragScroll("section");
 
   if (editingName) {
     return (
@@ -48,12 +50,8 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
       </header>
 
       <div
-        className="no-scrollbar grid min-h-0 min-w-0 touch-pan-x snap-x snap-mandatory grid-flow-col grid-rows-2 gap-[clamp(10px,1.6vw,18px)] overflow-x-auto overflow-y-hidden scroll-smooth pb-0.5 [grid-auto-columns:clamp(320px,42vw,440px)] [overscroll-behavior-x:contain] [-webkit-overflow-scrolling:touch] [&>section]:snap-start max-[620px]:[grid-auto-columns:88vw]"
-        onWheel={(event) => {
-          if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-            event.currentTarget.scrollLeft += event.deltaY;
-          }
-        }}
+        className="no-scrollbar grid min-h-0 min-w-0 touch-none cursor-grab snap-x snap-mandatory grid-flow-col grid-rows-2 gap-[clamp(10px,1.6vw,18px)] overflow-x-auto overflow-y-hidden scroll-smooth pb-0.5 [grid-auto-columns:clamp(320px,42vw,440px)] [overscroll-behavior-x:contain] [-webkit-overflow-scrolling:touch] [&>section]:snap-start data-[dragging=true]:cursor-grabbing data-[dragging=true]:scroll-auto max-[620px]:[grid-auto-columns:88vw]"
+        {...horizontalDragScroll}
       >
         <UpdatePanel language={settings.language} />
 
