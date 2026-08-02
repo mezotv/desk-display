@@ -16,6 +16,7 @@ The app is built with React, TanStack Start, Effect, and Tailwind CSS v4. The in
 - Moon phase with dynamically rendered pixel illumination
 - Day, week, month, and year progress
 - Raspberry Pi temperature, uptime, CPU, memory, and network status
+- Physical display sleep with one-tap touchscreen wake
 - A dynamic slider that includes connected integrations and useful active local apps
 - Touch settings, stable release updates, German and English UI, Night Mode, and OLED pixel shifting
 
@@ -97,6 +98,12 @@ Display technology cannot be detected reliably from a browser or from most HDMI/
 Night mode is enabled by default from 21:00 until 08:00 in the device's local time zone. It dims the entire rendered interface to 42% brightness and can be toggled or adjusted in 15-minute steps from the touch settings screen. A ringing alarm temporarily returns to full brightness.
 
 This visual dimmer is independent of the optional systemd backlight schedule in `deploy/`. When both are enabled, Night Mode dims the evening interface and the backlight schedule can still turn the panel completely off overnight.
+
+## Physical display power
+
+The Display app turns off the physical panel or backlight while leaving the Raspberry Pi, server, integrations, alarms, and timers running. The touchscreen remains active; one tap anywhere on the dark panel restores it. A due alarm or finished countdown timer also wakes the display automatically.
+
+Desk Display first tries a writable Linux backlight device, then the fixed privileged helper documented below, and finally X11 DPMS. It only reports success after a hardware method succeeds; it never substitutes a black webpage for hardware power control. Set `DESK_DISPLAY_BACKLIGHT_DIRECTORY` in `.env` if the device is not `/sys/class/backlight/10-0045`.
 
 ## Raspberry Pi deployment
 
@@ -273,6 +280,19 @@ systemctl status desk-display-schedule.service --no-pager
 ```
 
 The hardware schedule turns the backlight fully off from 00:00 to 08:00. The separate in-app Night Mode defaults to dimming the UI from 21:00 to 08:00 and can be adjusted from Settings.
+
+### 7. Allow the Display app to control a locked backlight
+
+Try the Display app first. Some Raspberry Pi OS installations give the active desktop user permission to write the backlight or support DPMS, requiring no extra setup. If the app reports that hardware power control is unavailable, install the narrowly scoped helper:
+
+```sh
+cd /home/display/desk-display
+sudo install -o root -g root -m 755 deploy/desk-display-backlight.sh /usr/local/sbin/desk-display-backlight
+sudo install -o root -g root -m 440 deploy/desk-display-backlight.sudoers /etc/sudoers.d/desk-display-backlight
+sudo visudo -cf /etc/sudoers.d/desk-display-backlight
+```
+
+Before installing, edit `BACKLIGHT_DIRECTORY` in `deploy/desk-display-backlight.sh` if your device name differs. The sudo policy permits the `display` account to run exactly two fixed commands—`desk-display-backlight on` and `desk-display-backlight off`—without granting a shell or arbitrary root command access.
 
 ### Updating an installed Pi
 

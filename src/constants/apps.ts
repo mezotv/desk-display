@@ -116,6 +116,12 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     label: { de: "SYSTEM", en: "SYSTEM" },
   },
   {
+    accent: "#a3e635",
+    icon: "/logos/display-power-pixel.svg",
+    id: "display-power",
+    label: { de: "DISPLAY", en: "DISPLAY" },
+  },
+  {
     accent: "#f59e0b",
     icon: "/logos/settings-pixel.svg",
     id: "settings",

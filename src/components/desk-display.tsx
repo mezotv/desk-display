@@ -1,5 +1,5 @@
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ActiveApp } from "@/components/active-app";
 import { AppLauncher } from "@/components/app-launcher";
@@ -7,6 +7,8 @@ import { AlarmApp } from "@/components/alarm-app";
 import { AlarmRinging } from "@/components/alarm-ringing";
 import { BootLoader } from "@/components/boot-loader";
 import { BrickBreakerApp } from "@/components/brick-breaker-app";
+import { DisplayPowerApp } from "@/components/display-power-app";
+import { DisplaySleepOverlay } from "@/components/display-sleep-overlay";
 import { PomodoroApp } from "@/components/pomodoro-app";
 import { PongApp } from "@/components/pong-app";
 import { SettingsApp } from "@/components/settings-app";
@@ -59,6 +61,7 @@ import { useRecurringRefresh } from "@/utils/use-recurring-refresh";
 import { getWeatherIcon } from "@/utils/get-weather-icon";
 import { getWeather } from "@/utils/weather.functions";
 import { isNightModeActive } from "@/utils/night-mode-time";
+import { useDisplayPower } from "@/utils/use-display-power";
 import { useProductivity } from "@/utils/use-productivity";
 import { usePomodoro } from "@/utils/use-pomodoro";
 
@@ -87,6 +90,7 @@ export function DeskDisplay({
   const [twitter, setTwitter] = useState(initialTwitter);
   const [twitterSlideIndex, setTwitterSlideIndex] = useState(0);
   const [weather, setWeather] = useState(initialWeather);
+  const automaticWakeAttempted = useRef<string | null>(null);
   const {
     changeTimerDuration,
     dismissTimerFinished,
@@ -107,6 +111,14 @@ export function DeskDisplay({
     state: pomodoro,
     toggle: togglePomodoro,
   } = usePomodoro();
+  const {
+    changing: displayPowerChanging,
+    error: displayPowerError,
+    ready: displayPowerReady,
+    sleep: sleepDisplay,
+    sleeping: displaySleeping,
+    wake: wakeDisplay,
+  } = useDisplayPower();
   const refreshMrr = useServerFn(getMrr);
   const refreshCalendar = useServerFn(getCalendar);
   const refreshSpotify = useServerFn(getSpotify);
@@ -191,6 +203,23 @@ export function DeskDisplay({
     },
     undefined,
   );
+
+  useEffect(() => {
+    const wakeReason = ringingAlarm?.id ?? (timerFinished ? "timer" : null);
+    if (!wakeReason) {
+      automaticWakeAttempted.current = null;
+      return;
+    }
+    if (
+      !displaySleeping ||
+      automaticWakeAttempted.current === wakeReason
+    ) {
+      return;
+    }
+
+    automaticWakeAttempted.current = wakeReason;
+    void wakeDisplay();
+  }, [displaySleeping, ringingAlarm, timerFinished, wakeDisplay]);
 
   const addAlarm = useCallback(
     (scheduledAt: string) => {
@@ -426,6 +455,7 @@ export function DeskDisplay({
     navigationReady &&
     productivityReady &&
     pomodoroReady &&
+    displayPowerReady &&
     bootDelayElapsed;
 
   if (!startupReady) {
@@ -436,6 +466,16 @@ export function DeskDisplay({
       >
         <BootLoader />
       </ScreenProtection>
+    );
+  }
+
+  if (displaySleeping) {
+    return (
+      <DisplaySleepOverlay
+        language={settings.language}
+        onWake={() => void wakeDisplay()}
+        waking={displayPowerChanging}
+      />
     );
   }
 
@@ -496,6 +536,23 @@ export function DeskDisplay({
           onChange={updateSettings}
           onHome={openLauncher}
           settings={settings}
+        />
+      </ScreenProtection>
+    );
+  }
+
+  if (activeApp === "display-power") {
+    return (
+      <ScreenProtection
+        enabled={settings.oledProtection}
+        nightModeActive={nightModeActive}
+      >
+        <DisplayPowerApp
+          changing={displayPowerChanging}
+          error={displayPowerError}
+          language={settings.language}
+          onHome={openLauncher}
+          onSleep={() => void sleepDisplay()}
         />
       </ScreenProtection>
     );

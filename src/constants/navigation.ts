@@ -20,6 +20,7 @@ export const APP_IDS = [
   "progress",
   "marquee",
   "system",
+  "display-power",
   "settings",
 ] as const satisfies readonly AppId[];
 

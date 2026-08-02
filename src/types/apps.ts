@@ -29,6 +29,7 @@ export type AppId =
   | "progress"
   | "marquee"
   | "system"
+  | "display-power"
   | "settings";
 
 export type AppDefinition = {
