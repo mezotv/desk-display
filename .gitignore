@@ -4,5 +4,8 @@ node_modules
 dist
 .env
 .env.local
+.desk-display-update
+.desk-display-version
+.desk-display-version.next
 .DS_Store
 .repos/effect
