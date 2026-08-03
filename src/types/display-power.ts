@@ -1,6 +1,10 @@
 import type { DisplayLanguage } from "@/types/settings";
 
-export type DisplayPowerMethod = "backlight" | "dpms" | "helper";
+export type DisplayPowerMethod =
+  | "backlight"
+  | "helper"
+  | "wlopm"
+  | "wlr-randr";
 
 export type DisplayPowerResult = {
   error: string | null;

@@ -7,8 +7,9 @@ import type { DisplayLanguage } from "@/types/settings";
 
 export const DISPLAY_POWER_METHODS = [
   "backlight",
-  "dpms",
   "helper",
+  "wlopm",
+  "wlr-randr",
 ] satisfies readonly DisplayPowerMethod[];
 
 export const DISPLAY_SLEEP_STORAGE_KEY = "desk-display-screen-sleep-v1";
@@ -22,7 +23,8 @@ export const DEFAULT_BACKLIGHT_DIRECTORY =
 export const DISPLAY_BACKLIGHT_HELPER =
   "/usr/local/sbin/desk-display-backlight";
 export const SUDO_EXECUTABLE = "/usr/bin/sudo";
-export const XSET_EXECUTABLE = "/usr/bin/xset";
+export const WLOPM_EXECUTABLE = "/usr/bin/wlopm";
+export const WLR_RANDR_EXECUTABLE = "/usr/bin/wlr-randr";
 
 export const DISPLAY_POWER_COPY: Record<
   DisplayLanguage,

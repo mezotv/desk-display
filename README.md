@@ -103,7 +103,7 @@ This visual dimmer is independent of the optional systemd backlight schedule in 
 
 The Display app turns off the physical panel or backlight while leaving the Raspberry Pi, server, integrations, alarms, and timers running. The touchscreen remains active; one tap anywhere on the dark panel restores it. A due alarm or finished countdown timer also wakes the display automatically.
 
-Desk Display first tries a writable Linux backlight device, then the fixed privileged helper documented below, and finally X11 DPMS. It only reports success after a hardware method succeeds; it never substitutes a black webpage for hardware power control. Set `DESK_DISPLAY_BACKLIGHT_DIRECTORY` in `.env` if the device is not `/sys/class/backlight/10-0045`.
+Desk Display first tries a writable Linux backlight device, then the fixed privileged helper documented below, and finally the Wayland `wlopm` and `wlr-randr` output-power commands. It only shows the touch-to-wake layer after a hardware command succeeds; it never substitutes a black webpage for hardware power control. Set `DESK_DISPLAY_BACKLIGHT_DIRECTORY` in `.env` if the device is not `/sys/class/backlight/10-0045`. If the Pi has multiple displays, set `DESK_DISPLAY_OUTPUT_NAME` to the output reported by `wlr-randr`, such as `DSI-2`.
 
 ## Raspberry Pi deployment
 
@@ -283,7 +283,12 @@ The hardware schedule turns the backlight fully off from 00:00 to 08:00. The sep
 
 ### 7. Allow the Display app to control a locked backlight
 
-Try the Display app first. Some Raspberry Pi OS installations give the active desktop user permission to write the backlight or support DPMS, requiring no extra setup. If the app reports that hardware power control is unavailable, install the narrowly scoped helper:
+Try the Display app first. Some Raspberry Pi OS installations give the active desktop user permission to write the backlight or include compatible Wayland output-power tools, requiring no extra setup. If the app reports that hardware power control is unavailable, install `wlopm` and `wlr-randr` from Raspberry Pi OS, or install the narrowly scoped backlight helper below:
+
+```sh
+sudo apt update
+sudo apt install -y wlopm wlr-randr
+```
 
 ```sh
 cd /home/display/desk-display

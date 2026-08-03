@@ -31,20 +31,12 @@ export function useDisplayPower(): UseDisplayPowerResult {
 
     setChanging(true);
     setError(null);
-    const sleepingState: DisplaySleepState = {
-      method: state.method,
-      sleeping: true,
-    };
-    setState(sleepingState);
-    saveDisplaySleepState(sleepingState);
 
     try {
       const result = await controlPower({
         data: { enabled: false, preferredMethod: state.method },
       });
       if (!result.success || !result.method) {
-        setState(DEFAULT_DISPLAY_SLEEP_STATE);
-        saveDisplaySleepState(DEFAULT_DISPLAY_SLEEP_STATE);
         setError(result.error ?? "Display power control is unavailable");
         return;
       }
@@ -56,8 +48,6 @@ export function useDisplayPower(): UseDisplayPowerResult {
       setState(nextState);
       saveDisplaySleepState(nextState);
     } catch {
-      setState(DEFAULT_DISPLAY_SLEEP_STATE);
-      saveDisplaySleepState(DEFAULT_DISPLAY_SLEEP_STATE);
       setError("Display power control is unavailable");
     } finally {
       setChanging(false);

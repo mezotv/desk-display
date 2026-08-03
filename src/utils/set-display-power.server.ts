@@ -9,8 +9,9 @@ import type {
   DisplayPowerResult,
 } from "@/types/display-power";
 import { setBacklightPower } from "@/utils/set-backlight-power.server";
-import { setDpmsPower } from "@/utils/set-dpms-power.server";
 import { setPrivilegedBacklightPower } from "@/utils/set-privileged-backlight-power.server";
+import { setWlopmPower } from "@/utils/set-wlopm-power.server";
+import { setWlrRandrPower } from "@/utils/set-wlr-randr-power.server";
 
 function setWithMethod(
   enabled: boolean,
@@ -18,7 +19,8 @@ function setWithMethod(
 ): Effect.Effect<void, DisplayPowerError> {
   if (method === "backlight") return setBacklightPower(enabled);
   if (method === "helper") return setPrivilegedBacklightPower(enabled);
-  return setDpmsPower(enabled);
+  if (method === "wlopm") return setWlopmPower(enabled);
+  return setWlrRandrPower(enabled);
 }
 
 const setWithFallbacks = Effect.fn("DisplayPower.setWithFallbacks")(
@@ -31,8 +33,13 @@ const setWithFallbacks = Effect.fn("DisplayPower.setWithFallbacks")(
         ),
       ),
       Effect.catch(() =>
-        setDpmsPower(enabled).pipe(
-          Effect.map((): DisplayPowerMethod => "dpms"),
+        setWlopmPower(enabled).pipe(
+          Effect.map((): DisplayPowerMethod => "wlopm"),
+        ),
+      ),
+      Effect.catch(() =>
+        setWlrRandrPower(enabled).pipe(
+          Effect.map((): DisplayPowerMethod => "wlr-randr"),
         ),
       ),
     );
