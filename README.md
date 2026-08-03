@@ -283,11 +283,11 @@ The hardware schedule turns the backlight fully off from 00:00 to 08:00. The sep
 
 ### 7. Allow the Display app to control a locked backlight
 
-Try the Display app first. Some Raspberry Pi OS installations give the active desktop user permission to write the backlight or include compatible Wayland output-power tools, requiring no extra setup. If the app reports that hardware power control is unavailable, install `wlopm` and `wlr-randr` from Raspberry Pi OS, or install the narrowly scoped backlight helper below:
+Try the Display app first. Some Raspberry Pi OS installations give the active desktop user permission to write the backlight or include compatible Wayland output-power tools, requiring no extra setup. If the app reports that hardware power control is unavailable, install `wlr-randr`, or install the narrowly scoped backlight helper below. Desk Display also uses `wlopm` automatically on newer Raspberry Pi OS releases where that package is available.
 
 ```sh
 sudo apt update
-sudo apt install -y wlopm wlr-randr
+sudo apt install -y wlr-randr
 ```
 
 ```sh
