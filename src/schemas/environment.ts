@@ -59,8 +59,31 @@ export const twitterEnvironmentSchema = Schema.Struct({
   ),
 });
 
+export const agentUsageEnvironmentSchema = Schema.Struct({
+  AGENT_USAGE_BRIDGE_TOKEN: Schema.NonEmptyString,
+  AGENT_USAGE_BRIDGE_URL: Schema.NonEmptyString,
+});
+
+export const agentUsageBridgeEnvironmentSchema = Schema.Struct({
+  DESK_DISPLAY_BRIDGE_HOST: Schema.optional(Schema.NonEmptyString),
+  DESK_DISPLAY_BRIDGE_PORT: Schema.optional(
+    Schema.NumberFromString.check(
+      Schema.isGreaterThanOrEqualTo(1),
+      Schema.isLessThanOrEqualTo(65_535),
+    ),
+  ),
+  DESK_DISPLAY_BRIDGE_TOKEN: Schema.optional(Schema.NonEmptyString),
+  DESK_DISPLAY_BRIDGE_TOKEN_FILE: Schema.optional(Schema.NonEmptyString),
+});
+
 export const decodeDisplayEnvironment = Schema.decodeUnknownOption(
   displayEnvironmentSchema,
+);
+export const decodeAgentUsageBridgeEnvironment = Schema.decodeUnknownOption(
+  agentUsageBridgeEnvironmentSchema,
+);
+export const decodeAgentUsageEnvironment = Schema.decodeUnknownOption(
+  agentUsageEnvironmentSchema,
 );
 export const decodeGoogleCalendarClientEnvironment = Schema.decodeUnknownOption(
   googleCalendarClientEnvironmentSchema,

@@ -26,7 +26,7 @@ function AppLauncherView({
         <span className="overflow-hidden text-ellipsis whitespace-nowrap">
           {homeGreeting}
         </span>
-        <time className="shrink-0 text-brand-purple">
+        <time className="shrink-0 text-slate-50">
           {formatClockTime(now, language)}
         </time>
       </header>
@@ -60,7 +60,7 @@ function AppLauncherView({
           </button>
         ))}
       </div>
-      <p className="m-0 text-center text-[clamp(15px,min(1.9vw,2.8vh),21px)] font-semibold text-[#5f5f6b]">
+      <p className="m-0 text-center text-[clamp(15px,min(1.9vw,2.8vh),21px)] font-semibold text-slate-50">
         {LOCALIZED_COPY[language].homeHint}
       </p>
     </main>

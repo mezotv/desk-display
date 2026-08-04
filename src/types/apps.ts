@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { CalendarSnapshot } from "@/types/calendar";
+import type { AgentUsageSnapshot } from "@/types/agent-usage";
 import type { MrrSnapshot } from "@/types/mrr";
 import type { ProductivityState } from "@/types/productivity";
 import type { SpotifySnapshot } from "@/types/spotify";
@@ -17,6 +18,8 @@ export type AppId =
   | "alarm"
   | "calendar"
   | "twitter"
+  | "codex-usage"
+  | "claude-usage"
   | "timer"
   | "pomodoro"
   | "stopwatch"
@@ -41,6 +44,9 @@ export type AppDefinition = {
 
 export type ActiveAppProps = {
   activeApp: AppId;
+  agentUsage: AgentUsageSnapshot;
+  claudeUsageSlideIndex: number;
+  codexUsageSlideIndex: number;
   calendar: CalendarSnapshot;
   isAnnual: boolean;
   language: DisplayLanguage;
@@ -57,6 +63,7 @@ export type ActiveAppProps = {
 };
 
 export type DeskDisplayProps = {
+  initialAgentUsage: AgentUsageSnapshot;
   initialCalendar: CalendarSnapshot;
   initialMrr: MrrSnapshot;
   initialSettings: DisplaySettings;

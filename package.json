@@ -1,14 +1,15 @@
 {
   "name": "desk-display",
-  "version": "0.6.3",
-  "description": "A pixel-art Raspberry Pi desk display for Stripe, Spotify, weather, calendars, alarms, and system status.",
+  "version": "0.7.0",
+  "description": "A pixel-art Raspberry Pi desk display for Stripe, Spotify, weather, calendars, AI usage, alarms, and system status.",
   "private": true,
   "type": "module",
   "scripts": {
     "postinstall": "./scripts/install-effect-skills.sh",
     "prepare": "./scripts/prepare-effect.sh",
     "dev": "vite dev --host 0.0.0.0",
-    "build": "vite build && tsc --noEmit",
+    "build": "vite build && vite build --config vite.agent-bridge.config.ts && tsc --noEmit",
+    "bridge": "node .output/agent-bridge/desk-display-agent-bridge.mjs",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {

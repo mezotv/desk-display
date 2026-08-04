@@ -36,6 +36,18 @@ export function areActiveAppPropsEqual(
         previous.twitter === next.twitter &&
         previous.twitterSlideIndex === next.twitterSlideIndex
       );
+    case "codex-usage":
+      return (
+        previous.agentUsage === next.agentUsage &&
+        previous.codexUsageSlideIndex === next.codexUsageSlideIndex &&
+        previous.now.getTime() === next.now.getTime()
+      );
+    case "claude-usage":
+      return (
+        previous.agentUsage === next.agentUsage &&
+        previous.claudeUsageSlideIndex === next.claudeUsageSlideIndex &&
+        previous.now.getTime() === next.now.getTime()
+      );
     case "clock":
     case "world":
     case "moon":

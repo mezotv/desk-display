@@ -12,7 +12,7 @@ import type { ReactNode } from 'react'
 export const Route = createRootRoute({
   component: RootComponent,
   head: () => ({
-    links: [{ rel: 'icon', href: '/logos/stripe.svg' }],
+    links: [{ rel: 'icon', href: '/logos/stripe-icon-logo.svg' }],
     meta: [
       { charSet: 'utf-8' },
       {

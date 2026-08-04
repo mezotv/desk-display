@@ -11,6 +11,7 @@ The app is built with React, TanStack Start, Effect, and Tailwind CSS v4. The in
 - Current weather and real local sunrise/sunset data
 - Google Calendar with upcoming events
 - Read-only X profile and touch-cycled 30-day analytics
+- Touch-cycled Codex and Claude limits, reset countdowns, and seven-day token charts while a paired Mac is awake
 - Clock, world clock, alarms, countdown timer, stopwatch, and persistent Pomodoro sessions
 - Touch-first Tic-Tac-Toe, Pong, and multi-hit Brick Breaker games
 - Moon phase with dynamically rendered pixel illumination
@@ -86,6 +87,37 @@ The X app is hidden until both values are configured. It cycles through the acco
 The current bearer-token integration uses public metrics from original posts, excluding replies and reposts. Its 30-day impression figure is therefore the sum of current impressions on original posts published during that window, not X's private historical account-impression series. The chart groups those impressions by each post's publication date.
 
 Desk Display requests at most 100 authored posts and caches X responses on the server for six hours, limiting automatic upstream refreshes to four per day. X bills reads per returned resource and normally deduplicates the same resource within a UTC day. Set a small monthly spending limit in the X Developer Console and consult [current X API pricing](https://docs.x.com/x-api/getting-started/pricing) before enabling the integration.
+
+### Codex and Claude usage
+
+The separate Codex and Claude apps read usage from a small authenticated bridge running on your Mac. This is necessary because personal subscription limits live with their signed-in desktop CLIs, not on the Raspberry Pi. When the Mac sleeps or leaves the network, the display shows **Mac is offline** instead of stale data as if it were current.
+
+The bridge uses the [official Codex app server](https://learn.chatgpt.com/docs/app-server.md) `account/rateLimits/read` and `account/usage/read` methods. For Claude it runs the [documented Claude Code `/usage` command](https://support.claude.com/en/articles/14553413-claude-code-cheatsheet) with tools disabled and a near-zero budget. Claude's seven-day chart is derived from local Claude Code session records, deduplicated by message ID, so it is explicitly labeled **This Mac only** and does not claim to include claude.ai or other computers. Prompts and conversation content never leave the Mac bridge; the Pi receives only percentages, reset timestamps, and daily token totals.
+
+Build and test the bridge on the Mac first:
+
+```sh
+npm install
+npm run build
+DESK_DISPLAY_BRIDGE_TOKEN="$(openssl rand -hex 32)" \
+DESK_DISPLAY_BRIDGE_HOST=127.0.0.1 \
+npm run bridge
+```
+
+Once the local test looks right, install it as a macOS LaunchAgent so it starts when you log in:
+
+```sh
+./scripts/install-agent-usage-bridge-macos.sh
+```
+
+The installer copies the compiled bridge and creates a private bearer token under `~/Library/Application Support/Desk Display`. It does not copy Codex or Claude credentials. Find the Mac's LAN address in **System Settings → Wi-Fi → Details → TCP/IP**, then add these two values to the Pi's owner-only `.env` file:
+
+```text
+AGENT_USAGE_BRIDGE_URL=http://192.168.1.23:4747
+AGENT_USAGE_BRIDGE_TOKEN=copy_the_contents_of_the_generated_token_file
+```
+
+Keep the Mac and Pi on a trusted home network, leave the bearer token file and Pi `.env` readable only by their owners, and reserve the Mac's LAN address in your router so it does not change. The bridge caches expensive local collection for 30 seconds. Desk Display refreshes it once per minute while either usage app is visible and once every ten minutes in the background; it does not continuously poll either CLI.
 
 ## OLED protection
 

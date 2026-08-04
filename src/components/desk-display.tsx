@@ -14,6 +14,10 @@ import { BootLoader } from "@/components/boot-loader";
 import { DisplaySleepOverlay } from "@/components/display-sleep-overlay";
 import { ScreenProtection } from "@/components/screen-protection";
 import { TimerFinished } from "@/components/timer-finished";
+import {
+  AGENT_USAGE_ACTIVE_REFRESH_INTERVAL_MS,
+  AGENT_USAGE_BACKGROUND_REFRESH_INTERVAL_MS,
+} from "@/constants/agent-usage";
 import { BOOT_LOADER_MINIMUM_MS } from "@/constants/boot";
 import {
   SPOTIFY_ACTIVE_REFRESH_INTERVAL_MS,
@@ -43,6 +47,7 @@ import {
 import type { Alarm, AlarmUpdater } from "@/types/alarm";
 import type { AppId, DeskDisplayProps } from "@/types/apps";
 import type { DisplaySettings } from "@/types/settings";
+import { getAgentUsage } from "@/utils/agent-usage.functions";
 import {
   loadAlarms,
   loadDisplaySettings,
@@ -52,6 +57,7 @@ import {
   saveNavigation,
 } from "@/utils/display-storage";
 import { getCalendar } from "@/utils/google-calendar.functions";
+import { getAgentUsageSlides } from "@/utils/get-agent-usage-slides";
 import { getMrr } from "@/utils/mrr.functions";
 import { getSpotify, setSpotifyPlayback } from "@/utils/spotify.functions";
 import { getSystem } from "@/utils/system.functions";
@@ -118,6 +124,7 @@ const TimerApp = lazy(() =>
 );
 
 export function DeskDisplay({
+  initialAgentUsage,
   initialCalendar,
   initialMrr,
   initialSettings,
@@ -127,6 +134,9 @@ export function DeskDisplay({
   initialWeather,
 }: DeskDisplayProps) {
   const [activeApp, setActiveApp] = useState<AppId>("stripe");
+  const [agentUsage, setAgentUsage] = useState(initialAgentUsage);
+  const [claudeUsageSlideIndex, setClaudeUsageSlideIndex] = useState(0);
+  const [codexUsageSlideIndex, setCodexUsageSlideIndex] = useState(0);
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [alarmsReady, setAlarmsReady] = useState(false);
   const [bootDelayElapsed, setBootDelayElapsed] = useState(false);
@@ -188,6 +198,8 @@ export function DeskDisplay({
   const usesSecondPrecision =
     !launcherOpen &&
     (activeApp === "clock" ||
+      activeApp === "codex-usage" ||
+      activeApp === "claude-usage" ||
       (activeApp === "spotify" && spotify.isPlaying) ||
       (activeApp === "timer" && productivity.timer.running) ||
       (activeApp === "pomodoro" && pomodoro.running) ||
@@ -202,6 +214,7 @@ export function DeskDisplay({
     wakeAt: nextAlarmAt,
   });
   const refreshMrr = useServerFn(getMrr);
+  const refreshAgentUsage = useServerFn(getAgentUsage);
   const refreshCalendar = useServerFn(getCalendar);
   const refreshSpotify = useServerFn(getSpotify);
   const controlSpotify = useServerFn(setSpotifyPlayback);
@@ -373,6 +386,14 @@ export function DeskDisplay({
     }
   }, [refreshMrr]);
 
+  const updateAgentUsage = useCallback(async () => {
+    try {
+      setAgentUsage(await refreshAgentUsage());
+    } catch (error) {
+      console.error("Unable to refresh AI usage", error);
+    }
+  }, [refreshAgentUsage]);
+
   const updateCalendar = useCallback(async () => {
     try {
       setCalendar(await refreshCalendar());
@@ -444,6 +465,18 @@ export function DeskDisplay({
       : DASHBOARD_BACKGROUND_REFRESH_INTERVAL_MS,
     false,
     mrr.configured && !displaySleeping,
+  );
+
+  const isAgentUsageVisible =
+    (activeApp === "codex-usage" || activeApp === "claude-usage") &&
+    !launcherOpen;
+  useRecurringRefresh(
+    updateAgentUsage,
+    isAgentUsageVisible
+      ? AGENT_USAGE_ACTIVE_REFRESH_INTERVAL_MS
+      : AGENT_USAGE_BACKGROUND_REFRESH_INTERVAL_MS,
+    isAgentUsageVisible,
+    agentUsage.configured && !displaySleeping,
   );
 
   useRecurringRefresh(
@@ -522,6 +555,20 @@ export function DeskDisplay({
         setTwitterSlideIndex(
           (slideIndex) =>
             (slideIndex + 1) % TWITTER_ANALYTICS_SLIDE_COUNT,
+        );
+      }
+
+      if (activeApp === "codex-usage") {
+        const slideCount = getAgentUsageSlides(agentUsage, "codex").length;
+        setCodexUsageSlideIndex(
+          (slideIndex) => (slideIndex + 1) % Math.max(1, slideCount),
+        );
+      }
+
+      if (activeApp === "claude-usage") {
+        const slideCount = getAgentUsageSlides(agentUsage, "claude").length;
+        setClaudeUsageSlideIndex(
+          (slideIndex) => (slideIndex + 1) % Math.max(1, slideCount),
         );
       }
 
@@ -787,7 +834,10 @@ export function DeskDisplay({
     >
       <ActiveApp
         activeApp={activeApp}
+        agentUsage={agentUsage}
         calendar={calendar}
+        claudeUsageSlideIndex={claudeUsageSlideIndex}
+        codexUsageSlideIndex={codexUsageSlideIndex}
         isAnnual={isAnnual}
         language={settings.language}
         mrr={mrr}

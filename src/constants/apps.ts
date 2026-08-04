@@ -2,7 +2,7 @@ import type { AppDefinition } from "@/types/apps";
 
 export const APP_DEFINITIONS: AppDefinition[] = [
   {
-    accent: "#af5cf6",
+    accent: "#533AFE",
     icon: "/logos/stripe-icon-logo.svg",
     id: "stripe",
     label: { de: "STRIPE", en: "STRIPE" },
@@ -20,7 +20,7 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     label: { de: "WETTER", en: "WEATHER" },
   },
   {
-    accent: "#f8fafc",
+    accent: "#8290ff",
     icon: "/logos/clock-pixel.svg",
     id: "clock",
     label: { de: "UHR", en: "CLOCK" },
@@ -42,6 +42,18 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     icon: "/logos/twitter.svg",
     id: "twitter",
     label: { de: "X", en: "X" },
+  },
+  {
+    accent: "#f8fafc",
+    icon: "/logos/codex.svg",
+    id: "codex-usage",
+    label: { de: "CODEX", en: "CODEX" },
+  },
+  {
+    accent: "#d97757",
+    icon: "/logos/claude-ai.svg",
+    id: "claude-usage",
+    label: { de: "CLAUDE", en: "CLAUDE" },
   },
   {
     accent: "#f97316",

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { BootLoader } from "@/components/boot-loader";
 import { DeskDisplay } from "@/components/desk-display";
+import { getAgentUsage } from "@/utils/agent-usage.functions";
 import { getCalendar } from "@/utils/google-calendar.functions";
 import { getMrr } from "@/utils/mrr.functions";
 import { getDisplaySettings } from "@/utils/settings.functions";
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/")({
   component: Home,
   loader: async () => {
     const [
+      initialAgentUsage,
       initialCalendar,
       initialMrr,
       initialSettings,
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/")({
       initialTwitter,
       initialWeather,
     ] = await Promise.all([
+      getAgentUsage(),
       getCalendar(),
       getMrr(),
       getDisplaySettings(),
@@ -33,6 +36,7 @@ export const Route = createFileRoute("/")({
     ]);
 
     return {
+      initialAgentUsage,
       initialCalendar,
       initialMrr,
       initialSettings,

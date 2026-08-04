@@ -1,5 +1,6 @@
 import { memo } from "react";
 
+import { AgentUsageApp } from "@/components/agent-usage-app";
 import { CalendarApp } from "@/components/calendar-app";
 import { DaylightApp } from "@/components/daylight-app";
 import { MarqueeCard } from "@/components/marquee-card";
@@ -29,7 +30,10 @@ import { getTimeProgress } from "@/utils/get-time-progress";
 
 function ActiveAppView({
   activeApp,
+  agentUsage,
   calendar,
+  claudeUsageSlideIndex,
+  codexUsageSlideIndex,
   isAnnual,
   language,
   mrr,
@@ -114,7 +118,7 @@ function ActiveAppView({
               alt="Stripe"
             />
             <span
-              className="block whitespace-nowrap text-[clamp(64px,min(14vw,24vh),220px)] font-extrabold leading-[0.9] tracking-[-0.07em] text-brand-purple max-[620px]:min-w-0 max-[620px]:overflow-hidden max-[620px]:text-[clamp(38px,12vw,64px)] max-[620px]:tracking-[-0.08em]"
+              className="block whitespace-nowrap text-[clamp(64px,min(14vw,24vh),220px)] font-extrabold leading-[0.9] tracking-[-0.07em] text-[#533AFE] max-[620px]:min-w-0 max-[620px]:overflow-hidden max-[620px]:text-[clamp(38px,12vw,64px)] max-[620px]:tracking-[-0.08em]"
               aria-live="polite"
             >
               {formattedRevenue}
@@ -218,6 +222,26 @@ function ActiveAppView({
           />
         )}
 
+        {activeApp === "codex-usage" && (
+          <AgentUsageApp
+            language={language}
+            now={now}
+            provider="codex"
+            slideIndex={codexUsageSlideIndex}
+            snapshot={agentUsage}
+          />
+        )}
+
+        {activeApp === "claude-usage" && (
+          <AgentUsageApp
+            language={language}
+            now={now}
+            provider="claude"
+            slideIndex={claudeUsageSlideIndex}
+            snapshot={agentUsage}
+          />
+        )}
+
         {activeApp === "clock" && (
           <div className="flex flex-col items-center justify-center transition-transform duration-100 group-active:scale-[0.985]">
             <time className="whitespace-nowrap text-[clamp(94px,min(16.5vw,28vh),240px)] font-extrabold leading-[0.82] tracking-[-0.07em] text-slate-50">
@@ -266,7 +290,7 @@ function ActiveAppView({
                       src="/logos/stripe-icon-logo.svg"
                     />
                     <div className="flex min-w-0 max-w-[min(58vw,760px)] flex-auto flex-col items-center justify-center gap-3.5 text-center max-[620px]:max-w-[88vw] max-[620px]:flex-[0_1_auto]">
-                      <strong className="block w-full overflow-hidden text-center text-[clamp(52px,min(9vw,15vh),120px)] font-extrabold leading-none text-ellipsis whitespace-nowrap text-brand-purple max-[620px]:text-[clamp(44px,14vw,72px)]">
+                      <strong className="block w-full overflow-hidden text-center text-[clamp(52px,min(9vw,15vh),120px)] font-extrabold leading-none text-ellipsis whitespace-nowrap text-[#533AFE] max-[620px]:text-[clamp(44px,14vw,72px)]">
                         {formattedMrr}
                       </strong>
                     </div>

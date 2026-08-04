@@ -8,6 +8,8 @@ export const APP_IDS = [
   "alarm",
   "calendar",
   "twitter",
+  "codex-usage",
+  "claude-usage",
   "timer",
   "pomodoro",
   "stopwatch",
