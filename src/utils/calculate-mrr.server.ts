@@ -171,6 +171,13 @@ async function calculateStripeMrr(
       limit: 100,
       status: 'active',
     })) {
+      if (
+        subscription.cancel_at_period_end ||
+        subscription.cancel_at !== null
+      ) {
+        continue
+      }
+
       const items = subscription.items.has_more
         ? await stripe.subscriptionItems
             .list({ limit: 100, subscription: subscription.id })
