@@ -10,6 +10,7 @@ export const DEFAULT_PIXELIZER_SETTINGS: PixelizerSettings = {
 };
 
 export const PIXELIZER_MAX_DIMENSION = 1_200;
+export const DISPLAY_PIXELIZER_MAX_DIMENSION = 512;
 
 export const PIXELIZER_PRESETS: PixelizerPreset[] = [
   { label: "Calendar", src: "/logos/google-calendar.svg" },

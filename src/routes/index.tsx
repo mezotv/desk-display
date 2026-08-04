@@ -11,6 +11,7 @@ import { getTwitter } from "@/utils/twitter.functions";
 import { getWeather } from "@/utils/weather.functions";
 
 export const Route = createFileRoute("/")({
+  ssr: "data-only",
   component: Home,
   loader: async () => {
     const [

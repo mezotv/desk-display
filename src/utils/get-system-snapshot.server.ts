@@ -65,15 +65,37 @@ async function getCpuTemperature() {
   }
 }
 
+async function getAvailableMemory(totalMemoryBytes: number) {
+  try {
+    const memoryInfo = await readFile("/proc/meminfo", "utf8");
+    const availableKilobytes = Number.parseInt(
+      memoryInfo.match(/^MemAvailable:\s+(\d+)\s+kB$/m)?.[1] ?? "",
+      10,
+    );
+
+    if (Number.isFinite(availableKilobytes)) {
+      return Math.min(totalMemoryBytes, availableKilobytes * 1_024);
+    }
+  } catch {
+    // Non-Linux development environments do not expose /proc/meminfo.
+  }
+
+  return freemem();
+}
+
 export async function getSystemSnapshot(): Promise<SystemSnapshot> {
   const activeNetwork = getActiveNetwork();
   const cpuCount = Math.max(1, cpus().length);
   const totalMemoryBytes = totalmem();
+  const [cpuTemperatureCelsius, availableMemoryBytes] = await Promise.all([
+    getCpuTemperature(),
+    getAvailableMemory(totalMemoryBytes),
+  ]);
 
   return {
     cpuLoadPercent: Math.min(100, Math.max(0, (loadavg()[0] / cpuCount) * 100)),
-    cpuTemperatureCelsius: await getCpuTemperature(),
-    freeMemoryBytes: freemem(),
+    cpuTemperatureCelsius,
+    freeMemoryBytes: availableMemoryBytes,
     hostname: hostname(),
     ipAddress: activeNetwork?.address ?? null,
     networkInterface: activeNetwork?.interfaceName ?? null,

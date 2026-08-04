@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-import { DEFAULT_PIXELIZER_SETTINGS } from "@/constants/pixelizer";
+import {
+  DEFAULT_PIXELIZER_SETTINGS,
+  DISPLAY_PIXELIZER_MAX_DIMENSION,
+} from "@/constants/pixelizer";
 import type { PixelatedImageProps } from "@/types/pixelated-image";
 import { renderPixelatedImage } from "@/utils/render-pixelated-image";
 
@@ -16,6 +19,9 @@ export function PixelatedImage({
     .join(" ");
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     let cancelled = false;
     const image = new Image();
 
@@ -26,13 +32,14 @@ export function PixelatedImage({
     }
     image.decoding = "async";
     image.onload = () => {
-      if (cancelled || !canvasRef.current) return;
+      if (cancelled) return;
 
       try {
         renderPixelatedImage(
-          canvasRef.current,
+          canvas,
           image,
           DEFAULT_PIXELIZER_SETTINGS,
+          DISPLAY_PIXELIZER_MAX_DIMENSION,
         );
       } catch (error) {
         console.error(`Unable to pixelize ${src}`, error);
@@ -48,6 +55,9 @@ export function PixelatedImage({
       cancelled = true;
       image.onload = null;
       image.onerror = null;
+      image.removeAttribute("src");
+      canvas.width = 0;
+      canvas.height = 0;
     };
   }, [src]);
 

@@ -10,12 +10,13 @@ export function renderPixelatedImage(
   canvas: HTMLCanvasElement,
   image: HTMLImageElement,
   settings: PixelizerSettings,
+  maxDimension = PIXELIZER_MAX_DIMENSION,
 ) {
   const sourceWidth = image.naturalWidth || image.width;
   const sourceHeight = image.naturalHeight || image.height;
   const scale = Math.min(
     1,
-    PIXELIZER_MAX_DIMENSION / Math.max(sourceWidth, sourceHeight),
+    maxDimension / Math.max(sourceWidth, sourceHeight),
   );
   const width = Math.max(1, Math.round(sourceWidth * scale));
   const height = Math.max(1, Math.round(sourceHeight * scale));

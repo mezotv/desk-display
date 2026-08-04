@@ -22,10 +22,17 @@ while true; do
     --noerrdialogs \
     --disable-infobars \
     --disable-session-crashed-bubble \
+    --disable-background-mode \
+    --disable-background-networking \
+    --disable-component-extensions-with-background-pages \
+    --disable-default-apps \
+    --disable-domain-reliability \
+    --disable-extensions \
+    --disable-sync \
+    --renderer-process-limit=2 \
     --autoplay-policy=no-user-gesture-required \
     --disable-features=Translate \
     "$DASHBOARD_URL"
 
   sleep 2
 done
-

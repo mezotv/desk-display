@@ -249,6 +249,15 @@ pgrep -af chromium
 curl --fail http://127.0.0.1:3000/ >/dev/null
 ```
 
+The supplied launcher disables unused Chromium background services and caps the kiosk at two renderer processes. This keeps extensions, sync, default apps, and background network subsystems out of the single-purpose display session without disabling normal page requests, media playback, or OAuth navigation.
+
+The in-app updater replaces the Desk Display application but does not overwrite files outside its installation directory. After updating an existing installation to a release with a newer kiosk launcher, install that launcher once more and reboot:
+
+```sh
+install -D -m 755 deploy/desk-display-kiosk.sh /home/display/.local/bin/desk-display-kiosk
+sudo reboot
+```
+
 ### 6. Enable the physical backlight schedule safely
 
 This step is optional and hardware-specific. The supplied script expects the tested Waveshare backlight at `/sys/class/backlight/10-0045`. Do not enable the timer until that directory exists on your Pi:
