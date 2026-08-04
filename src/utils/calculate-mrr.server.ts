@@ -173,7 +173,7 @@ async function calculateStripeMrr(
     })) {
       if (
         subscription.cancel_at_period_end ||
-        subscription.cancel_at !== null
+        subscription.canceled_at !== null
       ) {
         continue
       }
