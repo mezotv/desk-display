@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { CalendarApp } from "@/components/calendar-app";
 import { DaylightApp } from "@/components/daylight-app";
 import { MarqueeCard } from "@/components/marquee-card";
@@ -15,6 +17,7 @@ import { SPOTIFY_COPY } from "@/constants/spotify";
 import { SYSTEM_COPY } from "@/constants/system";
 import { TWITTER_COPY } from "@/constants/twitter";
 import type { ActiveAppProps } from "@/types/apps";
+import { areActiveAppPropsEqual } from "@/utils/are-active-app-props-equal";
 import { formatClockDate, formatClockTime } from "@/utils/format-clock";
 import { formatCompactNumber } from "@/utils/format-compact-number";
 import { formatCurrency } from "@/utils/format-currency";
@@ -24,7 +27,7 @@ import { getDaylightProgress } from "@/utils/get-daylight-progress";
 import { getMoonPhase } from "@/utils/get-moon-phase";
 import { getTimeProgress } from "@/utils/get-time-progress";
 
-export function ActiveApp({
+function ActiveAppView({
   activeApp,
   calendar,
   isAnnual,
@@ -412,3 +415,5 @@ export function ActiveApp({
     </main>
   );
 }
+
+export const ActiveApp = memo(ActiveAppView, areActiveAppPropsEqual);

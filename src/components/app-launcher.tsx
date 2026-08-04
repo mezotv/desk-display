@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { PixelatedImage } from "@/components/pixelated-image";
 import { APP_DEFINITIONS } from "@/constants/apps";
 import { LOCALIZED_COPY } from "@/constants/settings";
@@ -6,7 +8,7 @@ import { formatClockTime } from "@/utils/format-clock";
 import { getGreeting } from "@/utils/get-greeting";
 import { useHorizontalDragScroll } from "@/utils/use-horizontal-drag-scroll";
 
-export function AppLauncher({
+function AppLauncherView({
   language,
   name,
   now,
@@ -64,3 +66,5 @@ export function AppLauncher({
     </main>
   );
 }
+
+export const AppLauncher = memo(AppLauncherView);

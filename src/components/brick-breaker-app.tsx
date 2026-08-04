@@ -226,6 +226,9 @@ export function BrickBreakerApp({ language, onHome }: ArcadeAppProps) {
     const context = canvas?.getContext("2d");
     if (!context) return;
 
+    drawBrickBreaker(context, gameRef.current);
+    if (hud.status !== "playing") return;
+
     let frameId = 0;
     const render = (frameAt: number) => {
       const game = gameRef.current;
@@ -237,28 +240,28 @@ export function BrickBreakerApp({ language, onHome }: ArcadeAppProps) {
         : 0;
       game.lastFrameAt = frameAt;
 
-      if (game.status === "playing") {
-        const previousLives = game.lives;
-        const previousScore = game.score;
-        const previousStatus = game.status;
-        updateBrickBreaker(game, deltaSeconds);
+      const previousLives = game.lives;
+      const previousScore = game.score;
+      const previousStatus = game.status;
+      updateBrickBreaker(game, deltaSeconds);
 
-        if (
-          game.lives !== previousLives ||
-          game.score !== previousScore ||
-          game.status !== previousStatus
-        ) {
-          syncHud();
-        }
+      if (
+        game.lives !== previousLives ||
+        game.score !== previousScore ||
+        game.status !== previousStatus
+      ) {
+        syncHud();
       }
 
       drawBrickBreaker(context, game);
-      frameId = window.requestAnimationFrame(render);
+      if (game.status === "playing") {
+        frameId = window.requestAnimationFrame(render);
+      }
     };
 
     frameId = window.requestAnimationFrame(render);
     return () => window.cancelAnimationFrame(frameId);
-  }, []);
+  }, [hud.status]);
 
   const statusLabel =
     hud.status === "game-over"

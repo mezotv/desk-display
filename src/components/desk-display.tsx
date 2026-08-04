@@ -1,21 +1,18 @@
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { ActiveApp } from "@/components/active-app";
-import { AppLauncher } from "@/components/app-launcher";
-import { AlarmApp } from "@/components/alarm-app";
 import { AlarmRinging } from "@/components/alarm-ringing";
 import { BootLoader } from "@/components/boot-loader";
-import { BrickBreakerApp } from "@/components/brick-breaker-app";
-import { DisplayPowerApp } from "@/components/display-power-app";
 import { DisplaySleepOverlay } from "@/components/display-sleep-overlay";
-import { PomodoroApp } from "@/components/pomodoro-app";
-import { PongApp } from "@/components/pong-app";
-import { SettingsApp } from "@/components/settings-app";
 import { ScreenProtection } from "@/components/screen-protection";
-import { StopwatchApp } from "@/components/stopwatch-app";
-import { TicTacToeApp } from "@/components/tic-tac-toe-app";
-import { TimerApp } from "@/components/timer-app";
 import { TimerFinished } from "@/components/timer-finished";
 import { BOOT_LOADER_MINIMUM_MS } from "@/constants/boot";
 import {
@@ -31,7 +28,10 @@ import {
   CALENDAR_ACTIVE_REFRESH_INTERVAL_MS,
   CALENDAR_BACKGROUND_REFRESH_INTERVAL_MS,
 } from "@/constants/calendar";
-import { DASHBOARD_REFRESH_INTERVAL_MS } from "@/constants/dashboard";
+import {
+  DASHBOARD_ACTIVE_REFRESH_INTERVAL_MS,
+  DASHBOARD_BACKGROUND_REFRESH_INTERVAL_MS,
+} from "@/constants/dashboard";
 import {
   SYSTEM_ACTIVE_REFRESH_INTERVAL_MS,
   SYSTEM_BACKGROUND_REFRESH_INTERVAL_MS,
@@ -56,6 +56,7 @@ import { getMrr } from "@/utils/mrr.functions";
 import { getSpotify, setSpotifyPlayback } from "@/utils/spotify.functions";
 import { getSystem } from "@/utils/system.functions";
 import { getTwitter } from "@/utils/twitter.functions";
+import { useCurrentTime } from "@/utils/use-current-time";
 import { useTapGesture } from "@/utils/use-tap-gesture";
 import { useRecurringRefresh } from "@/utils/use-recurring-refresh";
 import { getWeatherIcon } from "@/utils/get-weather-icon";
@@ -64,6 +65,57 @@ import { isNightModeActive } from "@/utils/night-mode-time";
 import { useDisplayPower } from "@/utils/use-display-power";
 import { useProductivity } from "@/utils/use-productivity";
 import { usePomodoro } from "@/utils/use-pomodoro";
+
+const AppLauncher = lazy(() =>
+  import("@/components/app-launcher").then(({ AppLauncher: Component }) => ({
+    default: Component,
+  })),
+);
+const AlarmApp = lazy(() =>
+  import("@/components/alarm-app").then(({ AlarmApp: Component }) => ({
+    default: Component,
+  })),
+);
+const BrickBreakerApp = lazy(() =>
+  import("@/components/brick-breaker-app").then(
+    ({ BrickBreakerApp: Component }) => ({ default: Component }),
+  ),
+);
+const DisplayPowerApp = lazy(() =>
+  import("@/components/display-power-app").then(
+    ({ DisplayPowerApp: Component }) => ({ default: Component }),
+  ),
+);
+const PomodoroApp = lazy(() =>
+  import("@/components/pomodoro-app").then(({ PomodoroApp: Component }) => ({
+    default: Component,
+  })),
+);
+const PongApp = lazy(() =>
+  import("@/components/pong-app").then(({ PongApp: Component }) => ({
+    default: Component,
+  })),
+);
+const SettingsApp = lazy(() =>
+  import("@/components/settings-app").then(({ SettingsApp: Component }) => ({
+    default: Component,
+  })),
+);
+const StopwatchApp = lazy(() =>
+  import("@/components/stopwatch-app").then(
+    ({ StopwatchApp: Component }) => ({ default: Component }),
+  ),
+);
+const TicTacToeApp = lazy(() =>
+  import("@/components/tic-tac-toe-app").then(
+    ({ TicTacToeApp: Component }) => ({ default: Component }),
+  ),
+);
+const TimerApp = lazy(() =>
+  import("@/components/timer-app").then(({ TimerApp: Component }) => ({
+    default: Component,
+  })),
+);
 
 export function DeskDisplay({
   initialCalendar,
@@ -80,7 +132,6 @@ export function DeskDisplay({
   const [bootDelayElapsed, setBootDelayElapsed] = useState(false);
   const [launcherOpen, setLauncherOpen] = useState(false);
   const [navigationReady, setNavigationReady] = useState(false);
-  const [now, setNow] = useState(() => new Date());
   const [metricPeriod, setMetricPeriod] = useState<"mrr" | "arr">("mrr");
   const [calendar, setCalendar] = useState(initialCalendar);
   const [mrr, setMrr] = useState(initialMrr);
@@ -119,6 +170,37 @@ export function DeskDisplay({
     sleeping: displaySleeping,
     wake: wakeDisplay,
   } = useDisplayPower();
+  const nextAlarmAt = alarms.reduce<string | null>((earliest, alarm) => {
+    if (!alarm.enabled) return earliest;
+
+    const scheduledTimestamp = Date.parse(alarm.scheduledAt);
+    if (
+      Number.isNaN(scheduledTimestamp) ||
+      scheduledTimestamp < Date.now() - ALARM_TRIGGER_GRACE_MS
+    ) {
+      return earliest;
+    }
+
+    return !earliest || scheduledTimestamp < Date.parse(earliest)
+      ? alarm.scheduledAt
+      : earliest;
+  }, null);
+  const usesSecondPrecision =
+    !launcherOpen &&
+    (activeApp === "clock" ||
+      (activeApp === "spotify" && spotify.isPlaying) ||
+      (activeApp === "timer" && productivity.timer.running) ||
+      (activeApp === "pomodoro" && pomodoro.running) ||
+      (activeApp === "stopwatch" && productivity.stopwatch.running) ||
+      (activeApp === "marquee" &&
+        (spotify.isPlaying ||
+          productivity.timer.running ||
+          productivity.stopwatch.running)));
+  const now = useCurrentTime({
+    paused: displaySleeping,
+    precision: usesSecondPrecision ? "second" : "minute",
+    wakeAt: nextAlarmAt,
+  });
   const refreshMrr = useServerFn(getMrr);
   const refreshCalendar = useServerFn(getCalendar);
   const refreshSpotify = useServerFn(getSpotify);
@@ -353,23 +435,23 @@ export function DeskDisplay({
     }
   }, [refreshTwitter]);
 
-  useEffect(() => {
-    const clockInterval = window.setInterval(() => setNow(new Date()), 1_000);
-    const mrrInterval = window.setInterval(
-      updateMrr,
-      DASHBOARD_REFRESH_INTERVAL_MS,
-    );
-    const weatherInterval = window.setInterval(
-      updateWeather,
-      WEATHER_REFRESH_INTERVAL_MS,
-    );
+  const isMrrVisible =
+    (activeApp === "stripe" || activeApp === "marquee") && !launcherOpen;
+  useRecurringRefresh(
+    updateMrr,
+    isMrrVisible
+      ? DASHBOARD_ACTIVE_REFRESH_INTERVAL_MS
+      : DASHBOARD_BACKGROUND_REFRESH_INTERVAL_MS,
+    false,
+    mrr.configured && !displaySleeping,
+  );
 
-    return () => {
-      window.clearInterval(clockInterval);
-      window.clearInterval(mrrInterval);
-      window.clearInterval(weatherInterval);
-    };
-  }, [updateMrr, updateWeather]);
+  useRecurringRefresh(
+    updateWeather,
+    WEATHER_REFRESH_INTERVAL_MS,
+    false,
+    !displaySleeping,
+  );
 
   const isSpotifyVisible = activeApp === "spotify" && !launcherOpen;
   useRecurringRefresh(
@@ -378,6 +460,7 @@ export function DeskDisplay({
       ? SPOTIFY_ACTIVE_REFRESH_INTERVAL_MS
       : SPOTIFY_BACKGROUND_REFRESH_INTERVAL_MS,
     isSpotifyVisible,
+    spotify.configured && !displaySleeping,
   );
 
   const isCalendarVisible = activeApp === "calendar" && !launcherOpen;
@@ -387,6 +470,7 @@ export function DeskDisplay({
       ? CALENDAR_ACTIVE_REFRESH_INTERVAL_MS
       : CALENDAR_BACKGROUND_REFRESH_INTERVAL_MS,
     isCalendarVisible,
+    calendar.configured && !displaySleeping,
   );
 
   const isSystemVisible = activeApp === "system" && !launcherOpen;
@@ -396,6 +480,7 @@ export function DeskDisplay({
       ? SYSTEM_ACTIVE_REFRESH_INTERVAL_MS
       : SYSTEM_BACKGROUND_REFRESH_INTERVAL_MS,
     isSystemVisible,
+    !displaySleeping,
   );
 
   const isTwitterVisible = activeApp === "twitter" && !launcherOpen;
@@ -403,6 +488,7 @@ export function DeskDisplay({
     updateTwitter,
     TWITTER_REFRESH_INTERVAL_MS,
     isTwitterVisible,
+    twitter.configured && !displaySleeping,
   );
 
   const isAnnual = metricPeriod === "arr";
@@ -514,14 +600,16 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <AppLauncher
-          language={settings.language}
-          name={settings.name}
-          now={now}
-          onLaunch={launchApp}
-          twitterConfigured={twitter.configured}
-          weatherIcon={weatherIcon}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <AppLauncher
+            language={settings.language}
+            name={settings.name}
+            now={now}
+            onLaunch={launchApp}
+            twitterConfigured={twitter.configured}
+            weatherIcon={weatherIcon}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -532,11 +620,13 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <SettingsApp
-          onChange={updateSettings}
-          onHome={openLauncher}
-          settings={settings}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <SettingsApp
+            onChange={updateSettings}
+            onHome={openLauncher}
+            settings={settings}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -547,13 +637,15 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <DisplayPowerApp
-          changing={displayPowerChanging}
-          error={displayPowerError}
-          language={settings.language}
-          onHome={openLauncher}
-          onSleep={() => void sleepDisplay()}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <DisplayPowerApp
+            changing={displayPowerChanging}
+            error={displayPowerError}
+            language={settings.language}
+            onHome={openLauncher}
+            onSleep={() => void sleepDisplay()}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -564,15 +656,17 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <AlarmApp
-          alarms={alarms}
-          language={settings.language}
-          now={now}
-          onAdd={addAlarm}
-          onDelete={deleteAlarm}
-          onHome={openLauncher}
-          onToggle={toggleAlarm}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <AlarmApp
+            alarms={alarms}
+            language={settings.language}
+            now={now}
+            onAdd={addAlarm}
+            onDelete={deleteAlarm}
+            onHome={openLauncher}
+            onToggle={toggleAlarm}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -583,16 +677,18 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <TimerApp
-          language={settings.language}
-          now={now}
-          onChangeDuration={changeTimerDuration}
-          onHome={openLauncher}
-          onPause={pauseTimer}
-          onReset={resetTimer}
-          onStart={startTimer}
-          timer={productivity.timer}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <TimerApp
+            language={settings.language}
+            now={now}
+            onChangeDuration={changeTimerDuration}
+            onHome={openLauncher}
+            onPause={pauseTimer}
+            onReset={resetTimer}
+            onStart={startTimer}
+            timer={productivity.timer}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -603,16 +699,18 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <PomodoroApp
-          language={settings.language}
-          now={now}
-          onChangeMode={changePomodoroMode}
-          onChangePlanDuration={changePomodoroPlanDuration}
-          onHome={openLauncher}
-          onReset={resetPomodoro}
-          onToggle={togglePomodoro}
-          pomodoro={pomodoro}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <PomodoroApp
+            language={settings.language}
+            now={now}
+            onChangeMode={changePomodoroMode}
+            onChangePlanDuration={changePomodoroPlanDuration}
+            onHome={openLauncher}
+            onReset={resetPomodoro}
+            onToggle={togglePomodoro}
+            pomodoro={pomodoro}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -623,14 +721,16 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <StopwatchApp
-          language={settings.language}
-          now={now}
-          onHome={openLauncher}
-          onReset={resetStopwatch}
-          onToggle={toggleStopwatch}
-          stopwatch={productivity.stopwatch}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <StopwatchApp
+            language={settings.language}
+            now={now}
+            onHome={openLauncher}
+            onReset={resetStopwatch}
+            onToggle={toggleStopwatch}
+            stopwatch={productivity.stopwatch}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -641,10 +741,12 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <TicTacToeApp
-          language={settings.language}
-          onHome={openLauncher}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <TicTacToeApp
+            language={settings.language}
+            onHome={openLauncher}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -655,7 +757,9 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <PongApp language={settings.language} onHome={openLauncher} />
+        <Suspense fallback={<BootLoader />}>
+          <PongApp language={settings.language} onHome={openLauncher} />
+        </Suspense>
       </ScreenProtection>
     );
   }
@@ -666,10 +770,12 @@ export function DeskDisplay({
         enabled={settings.oledProtection}
         nightModeActive={nightModeActive}
       >
-        <BrickBreakerApp
-          language={settings.language}
-          onHome={openLauncher}
-        />
+        <Suspense fallback={<BootLoader />}>
+          <BrickBreakerApp
+            language={settings.language}
+            onHome={openLauncher}
+          />
+        </Suspense>
       </ScreenProtection>
     );
   }

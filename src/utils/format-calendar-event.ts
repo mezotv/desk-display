@@ -5,6 +5,17 @@ function getLocale(language: DisplayLanguage) {
   return language === "de" ? "de-DE" : "en-GB";
 }
 
+const calendarDateFormatters = {
+  de: new Intl.DateTimeFormat(getLocale("de"), {
+    day: "2-digit",
+    month: "short",
+  }),
+  en: new Intl.DateTimeFormat(getLocale("en"), {
+    day: "2-digit",
+    month: "short",
+  }),
+};
+
 export function formatCalendarEventStart(
   start: string,
   now: Date,
@@ -20,10 +31,7 @@ export function formatCalendarEventStart(
   if (allDay && isToday) return language === "de" ? "HEUTE" : "TODAY";
   if (isToday) return formatClockTime(startDate, language);
 
-  const date = new Intl.DateTimeFormat(getLocale(language), {
-    day: "2-digit",
-    month: "short",
-  }).format(startDate);
+  const date = calendarDateFormatters[language].format(startDate);
   return allDay ? date : `${date} · ${formatClockTime(startDate, language)}`;
 }
 

@@ -4,8 +4,11 @@ export function useRecurringRefresh(
   refresh: () => Promise<void>,
   intervalMs: number,
   refreshImmediately: boolean,
+  enabled = true,
 ) {
   useEffect(() => {
+    if (!enabled) return;
+
     let cancelled = false;
     let refreshTimer: number;
 
@@ -26,5 +29,5 @@ export function useRecurringRefresh(
       cancelled = true;
       window.clearTimeout(refreshTimer);
     };
-  }, [intervalMs, refresh, refreshImmediately]);
+  }, [enabled, intervalMs, refresh, refreshImmediately]);
 }

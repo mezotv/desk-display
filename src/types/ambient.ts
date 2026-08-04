@@ -3,6 +3,14 @@ import type { WeatherSnapshot } from "@/types/weather";
 
 export type LocalizedLabel = Record<DisplayLanguage, string>;
 
+export type ClockPrecision = "minute" | "second";
+
+export type UseCurrentTimeOptions = {
+  paused: boolean;
+  precision: ClockPrecision;
+  wakeAt: string | null;
+};
+
 export type WorldClockZone = {
   accent: string;
   label: LocalizedLabel;

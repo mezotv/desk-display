@@ -1,5 +1,16 @@
-import type { MoonPhaseName, WorldClockZone } from "@/types/ambient";
+import type {
+  ClockPrecision,
+  MoonPhaseName,
+  WorldClockZone,
+} from "@/types/ambient";
 import type { DisplayLanguage } from "@/types/settings";
+
+export const CLOCK_REFRESH_INTERVAL_MS: Record<ClockPrecision, number> = {
+  minute: 60_000,
+  second: 1_000,
+};
+
+export const MAX_BROWSER_TIMEOUT_MS = 2_147_000_000;
 
 export const WORLD_CLOCK_ZONES: WorldClockZone[] = [
   {

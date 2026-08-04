@@ -1,11 +1,18 @@
-export function formatCurrency(amountMinor: number, currency: string) {
-  const amount = amountMinor / 100
+const currencyFormatters = new Map<string, Intl.NumberFormat>();
 
-  return new Intl.NumberFormat('en-US', {
-    currency: currency.toUpperCase(),
-    currencyDisplay: 'narrowSymbol',
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0,
-    style: 'currency',
-  }).format(amount)
+export function formatCurrency(amountMinor: number, currency: string) {
+  const normalizedCurrency = currency.toUpperCase();
+  let formatter = currencyFormatters.get(normalizedCurrency);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat("en-US", {
+      currency: normalizedCurrency,
+      currencyDisplay: "narrowSymbol",
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+      style: "currency",
+    });
+    currencyFormatters.set(normalizedCurrency, formatter);
+  }
+
+  return formatter.format(amountMinor / 100);
 }

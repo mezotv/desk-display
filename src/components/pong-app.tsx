@@ -176,6 +176,9 @@ export function PongApp({ language, onHome }: ArcadeAppProps) {
     const context = canvas?.getContext("2d");
     if (!context) return;
 
+    drawPong(context, gameRef.current);
+    if (hud.status !== "playing") return;
+
     let frameId = 0;
     const render = (frameAt: number) => {
       const game = gameRef.current;
@@ -187,35 +190,35 @@ export function PongApp({ language, onHome }: ArcadeAppProps) {
         : 0;
       game.lastFrameAt = frameAt;
 
-      if (game.status === "playing") {
-        updatePong(game, deltaSeconds);
+      updatePong(game, deltaSeconds);
 
-        if (game.ballX < -PONG_BALL_SIZE) {
-          game.cpuScore += 1;
-          if (game.cpuScore >= PONG_WINNING_SCORE) {
-            game.status = "display-won";
-          } else {
-            resetPongBall(game, -1);
-          }
-          syncHud();
-        } else if (game.ballX > ARCADE_WIDTH + PONG_BALL_SIZE) {
-          game.playerScore += 1;
-          if (game.playerScore >= PONG_WINNING_SCORE) {
-            game.status = "you-won";
-          } else {
-            resetPongBall(game, 1);
-          }
-          syncHud();
+      if (game.ballX < -PONG_BALL_SIZE) {
+        game.cpuScore += 1;
+        if (game.cpuScore >= PONG_WINNING_SCORE) {
+          game.status = "display-won";
+        } else {
+          resetPongBall(game, -1);
         }
+        syncHud();
+      } else if (game.ballX > ARCADE_WIDTH + PONG_BALL_SIZE) {
+        game.playerScore += 1;
+        if (game.playerScore >= PONG_WINNING_SCORE) {
+          game.status = "you-won";
+        } else {
+          resetPongBall(game, 1);
+        }
+        syncHud();
       }
 
       drawPong(context, game);
-      frameId = window.requestAnimationFrame(render);
+      if (game.status === "playing") {
+        frameId = window.requestAnimationFrame(render);
+      }
     };
 
     frameId = window.requestAnimationFrame(render);
     return () => window.cancelAnimationFrame(frameId);
-  }, []);
+  }, [hud.status]);
 
   const statusLabel =
     hud.status === "you-won"

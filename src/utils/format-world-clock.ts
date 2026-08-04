@@ -1,16 +1,49 @@
 import type { DisplayLanguage } from "@/types/settings";
 
+const worldClockDayFormatters = new Map<string, Intl.DateTimeFormat>();
+const worldClockTimeFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function getWorldClockFormatter(
+  cache: Map<string, Intl.DateTimeFormat>,
+  language: DisplayLanguage,
+  timeZone: string,
+  kind: "day" | "time",
+) {
+  const key = `${language}:${timeZone}`;
+  const cachedFormatter = cache.get(key);
+  if (cachedFormatter) return cachedFormatter;
+
+  const formatter = new Intl.DateTimeFormat(
+    language === "de" ? "de-DE" : "en-US",
+    kind === "time"
+      ? {
+          hour: "2-digit",
+          hour12: language === "en",
+          minute: "2-digit",
+          timeZone,
+        }
+      : {
+          day: "2-digit",
+          month: "short",
+          timeZone,
+          weekday: "short",
+        },
+  );
+  cache.set(key, formatter);
+  return formatter;
+}
+
 export function formatWorldClockTime(
   date: Date,
   language: DisplayLanguage,
   timeZone: string,
 ) {
-  return new Intl.DateTimeFormat(language === "de" ? "de-DE" : "en-US", {
-    hour: "2-digit",
-    hour12: language === "en",
-    minute: "2-digit",
+  return getWorldClockFormatter(
+    worldClockTimeFormatters,
+    language,
     timeZone,
-  }).format(date);
+    "time",
+  ).format(date);
 }
 
 export function formatWorldClockDay(
@@ -18,12 +51,12 @@ export function formatWorldClockDay(
   language: DisplayLanguage,
   timeZone: string,
 ) {
-  return new Intl.DateTimeFormat(language === "de" ? "de-DE" : "en-US", {
-    day: "2-digit",
-    month: "short",
+  return getWorldClockFormatter(
+    worldClockDayFormatters,
+    language,
     timeZone,
-    weekday: "short",
-  })
+    "day",
+  )
     .format(date)
     .toLocaleUpperCase(language);
 }
