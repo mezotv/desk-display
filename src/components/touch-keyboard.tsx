@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { PixelIcon } from '@/components/pixel-icon'
+
 import {
   KEYBOARD_ROWS,
   LOCALIZED_COPY,
@@ -66,7 +68,7 @@ export function TouchKeyboard({
           onClick={() => setDraft((current) => current.slice(0, -1))}
           type="button"
         >
-          ⌫
+          <PixelIcon className="mx-auto size-7" name="backspace" />
         </button>
         <button
           className="min-w-[210px] rounded-[9px] border-0 bg-[#17171d] text-xl font-bold text-[#d6d6df] outline-none touch-manipulation active:scale-[0.97] active:bg-[#282833]"

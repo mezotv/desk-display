@@ -1,4 +1,5 @@
 import { TouchAppShell } from "@/components/touch-app-shell";
+import { PixelIcon } from "@/components/pixel-icon";
 import {
   MAX_POMODORO_PLAN_MS,
   MIN_POMODORO_PLAN_MS,
@@ -161,27 +162,35 @@ export function PomodoroApp({
             }
             type="button"
           >
-            −30
+            <span className="flex items-center justify-center gap-1">
+              <PixelIcon className="size-5" name="minus" />30
+            </span>
           </button>
           <button
             className="min-h-[clamp(48px,8.5vh,68px)] touch-manipulation rounded-[11px] border-0 bg-[#17171d] text-[clamp(15px,min(2vw,3.4vh),23px)] font-bold text-[#898995] outline-none active:scale-[0.97] active:bg-[#282833]"
             onClick={onReset}
             type="button"
           >
-            {copy.reset}
+            <span className="flex items-center justify-center gap-2">
+              <PixelIcon className="size-5" name="reset" />
+              {copy.reset}
+            </span>
           </button>
           <button
             className="min-h-[clamp(48px,8.5vh,68px)] touch-manipulation rounded-[11px] border-0 bg-rose-400 text-[clamp(18px,min(2.5vw,4.2vh),29px)] font-extrabold text-display-bg outline-none active:scale-[0.97] active:bg-rose-300"
             onClick={onToggle}
             type="button"
           >
-            {pomodoro.running
-              ? copy.pause
-              : snapshot.phase === "complete"
-                ? copy.startAgain
-                : hasProgress
-                  ? copy.resume
-                  : copy.start}
+            <span className="flex items-center justify-center gap-2">
+              <PixelIcon className="size-6" name={pomodoro.running ? "pause" : "play"} />
+              {pomodoro.running
+                ? copy.pause
+                : snapshot.phase === "complete"
+                  ? copy.startAgain
+                  : hasProgress
+                    ? copy.resume
+                    : copy.start}
+            </span>
           </button>
           <button
             className="min-h-[clamp(48px,8.5vh,68px)] touch-manipulation rounded-[11px] border-0 bg-[#17171d] text-[clamp(18px,min(2.5vw,4.2vh),29px)] font-extrabold text-[#a0a0ac] outline-none active:scale-[0.97] active:bg-[#282833] disabled:opacity-30"
@@ -199,7 +208,9 @@ export function PomodoroApp({
             }
             type="button"
           >
-            +30
+            <span className="flex items-center justify-center gap-1">
+              <PixelIcon className="size-5" name="plus" />30
+            </span>
           </button>
         </div>
       </div>

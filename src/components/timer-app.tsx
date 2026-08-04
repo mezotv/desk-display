@@ -1,4 +1,5 @@
 import { TouchAppShell } from "@/components/touch-app-shell";
+import { PixelIcon } from "@/components/pixel-icon";
 import {
   MAX_TIMER_DURATION_MS,
   MIN_TIMER_DURATION_MS,
@@ -71,21 +72,29 @@ export function TimerApp({
             }
             type="button"
           >
-            −5
+            <span className="flex items-center justify-center gap-1">
+              <PixelIcon className="size-5" name="minus" />5
+            </span>
           </button>
           <button
             className="min-h-[clamp(50px,9vh,72px)] touch-manipulation rounded-[11px] border-0 bg-[#17171d] text-[clamp(17px,min(2.25vw,3.8vh),26px)] font-bold text-[#8c8c98] outline-none active:scale-[0.97] active:bg-[#282833]"
             onClick={onReset}
             type="button"
           >
-            {copy.reset}
+            <span className="flex items-center justify-center gap-2">
+              <PixelIcon className="size-5" name="reset" />
+              {copy.reset}
+            </span>
           </button>
           <button
             className="min-h-[clamp(50px,9vh,72px)] touch-manipulation rounded-[11px] border-0 bg-orange-500 text-[clamp(20px,min(2.8vw,4.6vh),32px)] font-extrabold text-display-bg outline-none active:scale-[0.97] active:bg-orange-400"
             onClick={timer.running ? onPause : onStart}
             type="button"
           >
-            {timer.running ? copy.pause : remainingMs < timer.durationMs ? copy.resume : copy.start}
+            <span className="flex items-center justify-center gap-2">
+              <PixelIcon className="size-6" name={timer.running ? "pause" : "play"} />
+              {timer.running ? copy.pause : remainingMs < timer.durationMs ? copy.resume : copy.start}
+            </span>
           </button>
           <button
             className="min-h-[clamp(50px,9vh,72px)] touch-manipulation rounded-[11px] border-0 bg-[#17171d] text-[clamp(21px,min(3vw,5vh),34px)] font-extrabold text-[#a4a4af] outline-none active:scale-[0.97] active:bg-[#282833] disabled:opacity-35"
@@ -97,7 +106,9 @@ export function TimerApp({
             }
             type="button"
           >
-            +5
+            <span className="flex items-center justify-center gap-1">
+              <PixelIcon className="size-5" name="plus" />5
+            </span>
           </button>
         </div>
       </div>

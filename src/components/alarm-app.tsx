@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { PixelIcon } from "@/components/pixel-icon";
 import { ALARM_COPY, MAX_ALARMS } from "@/constants/alarm";
 import type {
   AlarmAppProps,
@@ -33,7 +34,7 @@ function AlarmStepper({
         onClick={onIncrease}
         type="button"
       >
-        +
+        <PixelIcon className="mx-auto size-7" name="plus" />
       </button>
       <strong className="grid min-w-0 place-items-center overflow-hidden text-center text-[26px] font-extrabold leading-none text-ellipsis whitespace-nowrap text-display-text max-[620px]:text-xl">
         {value}
@@ -44,7 +45,7 @@ function AlarmStepper({
         onClick={onDecrease}
         type="button"
       >
-        −
+        <PixelIcon className="mx-auto size-7" name="minus" />
       </button>
     </div>
   );
@@ -149,7 +150,10 @@ export function AlarmApp({
           onClick={onHome}
           type="button"
         >
-          ← {copy.back}
+          <span className="flex items-center gap-2">
+            <PixelIcon className="size-5" name="back" />
+            {copy.back}
+          </span>
         </button>
         <h1 className="m-0 whitespace-nowrap text-[27px] font-extrabold tracking-[0.06em] text-red-500 [@media(min-width:1100px)_and_(min-height:650px)]:text-4xl max-[620px]:text-[clamp(20px,6.5vw,27px)]">
           {copy.alarms}
@@ -231,7 +235,7 @@ export function AlarmApp({
                   onClick={() => onDelete(alarm.id)}
                   type="button"
                 >
-                  ×
+                  <PixelIcon className="mx-auto size-7" name="trash" />
                 </button>
               </article>
             );

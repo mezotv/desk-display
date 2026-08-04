@@ -29,6 +29,8 @@ export const LOCALIZED_COPY = {
   de: {
     back: 'ZURÜCK',
     cancel: 'ABBRECHEN',
+    credits: 'ICON-CREDITS',
+    creditsHint: 'PIXEL-ART-STIL & REFERENZEN',
     done: 'FERTIG',
     greeting: {
       afternoon: 'Guten Tag',
@@ -54,6 +56,8 @@ export const LOCALIZED_COPY = {
   en: {
     back: 'BACK',
     cancel: 'CANCEL',
+    credits: 'ICON CREDITS',
+    creditsHint: 'PIXEL-ART STYLE & REFERENCES',
     done: 'DONE',
     greeting: {
       afternoon: 'Good afternoon',

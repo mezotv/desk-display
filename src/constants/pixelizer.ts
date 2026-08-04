@@ -14,7 +14,7 @@ export const DISPLAY_PIXELIZER_MAX_DIMENSION = 512;
 
 export const PIXELIZER_PRESETS: PixelizerPreset[] = [
   { label: "Calendar", src: "/logos/google-calendar.svg" },
-  { label: "Stripe", src: "/logos/stripe-official.svg" },
+  { label: "Stripe", src: "/logos/stripe-icon-logo.svg" },
   { label: "Spotify", src: "/logos/spotify.svg" },
   { label: "Twitter", src: "/logos/twitter.svg" },
   { label: "Weather", src: "/logos/weather-pixel.png" },

@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="234.375 234.375 531.25 531.25" role="img" aria-labelledby="title">
-  <title id="title">Stripe</title>
-  <path fill="#533AFE" fill-rule="evenodd" d="M234.375 765.625 765.625 652.963V234.375L234.375 348.354v417.271Z" clip-rule="evenodd" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <path fill="#2d1fd0" d="M6 2h12v2h3v16h-3v2H6v-2H3V4h3z"/>
+  <path fill="#533AFE" d="M6 4h12v2h2v11h-2v2H6v-2H4V6h2z"/>
+  <path fill="#8b7cff" d="M8 6h9v3h-6v2h4v2h2v5H7v-3h7v-2h-4v-2H8z"/>
+  <path fill="#fff" d="M8 7h8v2h-5v2H9V9H8zm3 4h4v2h-4zm3 2h3v4H8v-2h6z"/>
 </svg>

@@ -1,4 +1,5 @@
 import { NIGHT_MODE_TIME_STEP_MINUTES } from '@/constants/settings'
+import { PixelIcon } from '@/components/pixel-icon'
 import type { NightTimeControlProps } from '@/types/settings'
 import { shiftClockTime } from '@/utils/night-mode-time'
 
@@ -20,7 +21,7 @@ export function NightTimeControl({
         }
         type="button"
       >
-        −
+        <PixelIcon className="size-[18px]" name="minus" />
       </button>
       <time className="grid min-w-0 place-items-center overflow-hidden rounded-lg border-0 bg-[#17171d] text-[clamp(17px,min(2.25vw,3.75vh),25px)] font-bold whitespace-nowrap text-display-text max-[370px]:text-[17px]">
         {value}
@@ -33,7 +34,7 @@ export function NightTimeControl({
         }
         type="button"
       >
-        +
+        <PixelIcon className="size-[18px]" name="plus" />
       </button>
     </div>
   )

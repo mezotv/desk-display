@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { TouchKeyboard } from "@/components/touch-keyboard";
 import { NightTimeControl } from "@/components/night-time-control";
+import { PixelIcon } from "@/components/pixel-icon";
 import { PixelatedImage } from "@/components/pixelated-image";
 import { UpdatePanel } from "@/components/update-panel";
 import { LOCALIZED_COPY } from "@/constants/settings";
@@ -35,7 +36,10 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
           onClick={onHome}
           type="button"
         >
-          ← {copy.back}
+          <span className="flex items-center gap-2">
+            <PixelIcon className="size-5" name="back" />
+            {copy.back}
+          </span>
         </button>
         <h1 className="m-0 text-[28px] font-extrabold tracking-[0.05em] text-amber-500 [@media(min-width:1100px)_and_(min-height:650px)]:text-4xl max-[620px]:text-[clamp(20px,6.5vw,27px)]">
           {copy.settings}
@@ -178,6 +182,40 @@ export function SettingsApp({ onChange, onHome, settings }: SettingsAppProps) {
                 value={settings.nightModeEnd}
               />
             </div>
+          </div>
+        </section>
+
+        <section className="grid min-h-0 content-center gap-[clamp(10px,1.7vh,16px)] rounded-[14px] bg-display-panel px-[clamp(14px,2vw,26px)] py-[clamp(12px,2vh,22px)] [@media(max-width:620px)_and_(orientation:portrait)]:p-3">
+          <div className="flex items-center gap-3">
+            <PixelatedImage
+              alt=""
+              className="size-[clamp(42px,5vw,62px)] shrink-0"
+              src="/logos/settings-pixel.svg"
+            />
+            <span className="min-w-0 text-[clamp(21px,min(2.8vw,4.6vh),34px)] font-bold leading-none tracking-[0.07em] text-[#7f7f8b] max-[620px]:text-[clamp(17px,5.5vw,22px)]">
+              {copy.credits}
+              <small className="mt-[5px] block text-[11px] font-semibold tracking-[0.04em] text-[#52525d]">
+                {copy.creditsHint}
+              </small>
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              className="grid min-h-[58px] touch-manipulation place-items-center rounded-[10px] bg-[#17171d] px-2 text-center text-[clamp(15px,min(1.8vw,3vh),21px)] font-extrabold text-brand-purple no-underline active:scale-[0.97] active:bg-[#282833]"
+              href="https://reffpixels.itch.io/"
+              rel="noreferrer"
+              target="_blank"
+            >
+              REFF PIXELS
+            </a>
+            <a
+              className="grid min-h-[58px] touch-manipulation place-items-center rounded-[10px] bg-[#17171d] px-2 text-center text-[clamp(15px,min(1.8vw,3vh),21px)] font-extrabold text-amber-500 no-underline active:scale-[0.97] active:bg-[#282833]"
+              href="https://cactusphd.itch.io/bonus-pixelart-icons"
+              rel="noreferrer"
+              target="_blank"
+            >
+              CACTUSPHD
+            </a>
           </div>
         </section>
       </div>

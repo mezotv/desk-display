@@ -2,6 +2,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useState } from "react";
 
 import { UPDATE_COPY } from "@/constants/update";
+import { PixelIcon } from "@/components/pixel-icon";
 import type {
   UpdatePanelProps,
   UpdatePhase,
@@ -131,7 +132,13 @@ export function UpdatePanel({ language }: UpdatePanelProps) {
           onClick={() => void refreshStatus()}
           type="button"
         >
-          ↻ {phase === "checking" ? copy.checking : copy.refresh}
+          <span className="flex items-center justify-center gap-2">
+            <PixelIcon
+              className={`size-5 ${phase === "checking" ? "animate-[boot-loader-turn_1s_steps(8,end)_infinite]" : ""}`}
+              name="refresh"
+            />
+            {phase === "checking" ? copy.checking : copy.refresh}
+          </span>
         </button>
 
         {status?.updateAvailable && installSupported ? (
@@ -141,7 +148,10 @@ export function UpdatePanel({ language }: UpdatePanelProps) {
             onClick={() => void runUpdate()}
             type="button"
           >
-            {phase === "installing" ? `${copy.install}…` : copy.install}
+            <span className="flex items-center justify-center gap-2">
+              <PixelIcon className="size-5" name="check" />
+              {phase === "installing" ? `${copy.install}…` : copy.install}
+            </span>
           </button>
         ) : null}
       </div>

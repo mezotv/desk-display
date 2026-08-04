@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { TouchAppShell } from "@/components/touch-app-shell";
+import { PixelIcon } from "@/components/pixel-icon";
 import {
   ARCADE_BACKGROUND_COLOR,
   ARCADE_BALL_COLOR,
@@ -329,7 +330,10 @@ export function BrickBreakerApp({ language, onHome }: ArcadeAppProps) {
               {statusLabel}
             </strong>
             <span className="mx-auto rounded-[10px] bg-amber-400 px-7 py-3 text-[clamp(18px,min(2.3vw,3.8vh),28px)] font-extrabold text-display-bg">
-              {copy.play}
+              <span className="flex items-center gap-2">
+                <PixelIcon className="size-6" name="play" />
+                {copy.play}
+              </span>
             </span>
           </button>
         ) : null}

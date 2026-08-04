@@ -3,5 +3,5 @@
   <path fill="#f59e0b" d="M7 22h12v10H7zm15 0h20v10H22zm23 0h20v10H45z"/>
   <path fill="#af5cf6" d="M7 35h18v10H7zm21 0h16v10H28zm19 0h18v10H47z"/>
   <rect x="33" y="48" width="7" height="7" fill="#f8fafc"/>
-  <rect x="19" y="59" width="34" height="7" rx="2" fill="#22d3ee"/>
+  <path fill="#22d3ee" d="M21 57h30v2h3v7h-3v2H21v-2h-3v-7h3z"/>
 </svg>

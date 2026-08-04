@@ -1,4 +1,5 @@
 import { TouchAppShell } from "@/components/touch-app-shell";
+import { PixelIcon } from "@/components/pixel-icon";
 import { PRODUCTIVITY_COPY } from "@/constants/productivity";
 import type { StopwatchAppProps } from "@/types/productivity";
 import { formatDuration } from "@/utils/format-duration";
@@ -35,14 +36,20 @@ export function StopwatchApp({
             onClick={onReset}
             type="button"
           >
-            {copy.reset}
+            <span className="flex items-center justify-center gap-2">
+              <PixelIcon className="size-6" name="reset" />
+              {copy.reset}
+            </span>
           </button>
           <button
             className="min-h-[clamp(58px,11vh,86px)] touch-manipulation rounded-[12px] border-0 bg-cyan-400 text-[clamp(24px,min(3.3vw,5.5vh),38px)] font-extrabold text-display-bg outline-none active:scale-[0.97] active:bg-cyan-300"
             onClick={onToggle}
             type="button"
           >
-            {stopwatch.running ? copy.pause : elapsedMs > 0 ? copy.resume : copy.start}
+            <span className="flex items-center justify-center gap-2">
+              <PixelIcon className="size-7" name={stopwatch.running ? "pause" : "play"} />
+              {stopwatch.running ? copy.pause : elapsedMs > 0 ? copy.resume : copy.start}
+            </span>
           </button>
         </div>
       </div>

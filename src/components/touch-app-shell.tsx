@@ -1,4 +1,5 @@
 import { PixelatedImage } from "@/components/pixelated-image";
+import { PixelIcon } from "@/components/pixel-icon";
 import type { TouchAppShellProps } from "@/types/apps";
 
 export function TouchAppShell({
@@ -16,7 +17,7 @@ export function TouchAppShell({
           onClick={onHome}
           type="button"
         >
-          ←
+          <PixelIcon className="size-6" name="back" />
         </button>
         <div className="flex min-w-0 items-center justify-center gap-[clamp(8px,1.2vw,14px)]">
           <PixelatedImage

@@ -369,3 +369,16 @@ External integrations use Effect for typed errors, schema validation, request ti
 ## License
 
 Desk Display is available under the MIT License. See `LICENSE`.
+
+## Pixel-art credits
+
+Desk Display's original 24×24 app and control icons take visual direction from
+[Generic Icons by Reff Pixels](https://reffpixels.itch.io/genericicons),
+[App Icons by Reff Pixels](https://reffpixels.itch.io/appicons), and
+[Bonus Pixel Art Icons by CactusPhD](https://cactusphd.itch.io/bonus-pixelart-icons).
+Thank you to both artists for publishing such thoughtful pixel-art references.
+
+The repository does not redistribute Reff Pixels' personal-use-only App Icons
+pack. Brand and game icons are original, grid-drawn adaptations so the public
+MIT repository remains safe to reuse. Reff Pixels' profile is also linked from
+the in-app Settings screen: [reffpixels.itch.io](https://reffpixels.itch.io/).
