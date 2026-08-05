@@ -33,8 +33,27 @@ export function AgentCostApp({
 }: AgentCostAppProps) {
   const copy = AGENT_COST_COPY[language];
   const estimate = getAgentCostEstimate(snapshot);
-  const activeSlide = slideIndex % 3;
+  const activeSlide = slideIndex % 4;
   const totalTokens = getTokenTotal(estimate.tokens);
+  const providerEstimates = (["codex", "claude"] as const).map(
+    (provider) => {
+      const models = estimate.models.filter(
+        (model) => model.provider === provider,
+      );
+      return {
+        estimatedUsd: models.reduce(
+          (total, model) => total + (model.estimatedUsd ?? 0),
+          0,
+        ),
+        provider,
+        tokens: models.reduce(
+          (total, model) => total + getTokenTotal(model),
+          0,
+        ),
+        unpriced: models.some((model) => model.estimatedUsd === null),
+      };
+    },
+  );
   const stale =
     !snapshot.online || snapshot.claude.stale || snapshot.codex.stale;
 
@@ -66,7 +85,7 @@ export function AgentCostApp({
             {copy.title}
           </strong>
           <span className="mt-2 block text-[clamp(13px,min(1.6vw,2.6vh),21px)] font-bold tracking-[0.12em] text-[#666672]">
-            {activeSlide + 1} / 3{stale ? " · CACHED" : ""}
+            {activeSlide + 1} / 4{stale ? " · CACHED" : ""}
           </span>
         </div>
       </header>
@@ -135,6 +154,48 @@ export function AgentCostApp({
       )}
 
       {activeSlide === 2 && (
+        <section className="w-full">
+          <h2 className="text-[clamp(17px,min(2.3vw,3.8vh),31px)] font-bold tracking-[0.1em] text-emerald-400">
+            {copy.providers}
+          </h2>
+          <div className="mt-[clamp(16px,3vh,30px)] grid grid-cols-2 gap-[clamp(12px,2vw,28px)] max-[680px]:grid-cols-1">
+            {providerEstimates.map((provider) => (
+              <article
+                className="flex flex-col items-center rounded-[clamp(14px,2vw,26px)] bg-[#17171e] px-[clamp(16px,3vw,36px)] py-[clamp(20px,4.5vh,44px)]"
+                key={provider.provider}
+              >
+                <PixelatedImage
+                  alt=""
+                  className="size-[clamp(58px,min(8vw,13vh),108px)] object-contain"
+                  src={
+                    provider.provider === "codex"
+                      ? "/logos/codex.svg"
+                      : "/logos/claude-ai.svg"
+                  }
+                />
+                <strong
+                  className="mt-[clamp(10px,2vh,18px)] text-[clamp(21px,min(3vw,5vh),40px)]"
+                  style={{
+                    color:
+                      provider.provider === "codex" ? "#8290ff" : "#d97757",
+                  }}
+                >
+                  {copy[provider.provider]}
+                </strong>
+                <strong className="mt-[clamp(8px,1.5vh,16px)] text-[clamp(48px,min(8vw,13vh),108px)] leading-none tracking-[-0.06em] text-emerald-400 tabular-nums">
+                  {formatEstimatedCost(provider.estimatedUsd)}
+                  {provider.unpriced ? "*" : ""}
+                </strong>
+                <span className="mt-[clamp(10px,2vh,18px)] text-[clamp(14px,min(1.8vw,3vh),24px)] font-bold tracking-[0.08em] text-[#777782] tabular-nums">
+                  {formatCompactNumber(provider.tokens)} {copy.totalTokens}
+                </span>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {activeSlide === 3 && (
         <section className="w-full">
           <h2 className="text-[clamp(17px,min(2.3vw,3.8vh),31px)] font-bold tracking-[0.1em] text-emerald-400">
             {copy.models}
