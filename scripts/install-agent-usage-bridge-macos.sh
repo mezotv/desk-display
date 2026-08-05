@@ -20,6 +20,8 @@ if [ -z "$node_path" ]; then
   exit 1
 fi
 
+bridge_path_environment="$(dirname "$node_path"):/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
 application_directory="$HOME/Library/Application Support/Desk Display"
 launch_agent_directory="$HOME/Library/LaunchAgents"
 launch_agent_path="$launch_agent_directory/com.desk-display.agent-usage-bridge.plist"
@@ -41,6 +43,7 @@ trap 'rm -f "$temporary_plist"' EXIT HUP INT TERM
 
 sed \
   -e "s|__NODE_PATH__|$node_path|g" \
+  -e "s|__BRIDGE_PATH_ENVIRONMENT__|$bridge_path_environment|g" \
   -e "s|__BRIDGE_PATH__|$bridge_path|g" \
   -e "s|__TOKEN_PATH__|$token_path|g" \
   -e "s|__STDOUT_PATH__|$stdout_path|g" \
@@ -50,8 +53,24 @@ sed \
 
 plutil -lint "$temporary_plist" >/dev/null
 install -m 600 "$temporary_plist" "$launch_agent_path"
-launchctl bootout "gui/$(id -u)/com.desk-display.agent-usage-bridge" 2>/dev/null || true
-launchctl bootstrap "gui/$(id -u)" "$launch_agent_path"
+launchctl bootout "gui/$(id -u)" "$launch_agent_path" 2>/dev/null || \
+  launchctl bootout "gui/$(id -u)/com.desk-display.agent-usage-bridge" 2>/dev/null || \
+  true
+
+bridge_loaded=false
+for attempt in 1 2 3; do
+  if launchctl bootstrap "gui/$(id -u)" "$launch_agent_path" 2>/dev/null; then
+    bridge_loaded=true
+    break
+  fi
+  sleep 1
+done
+
+if [ "$bridge_loaded" != true ]; then
+  echo "Unable to load the Desk Display bridge LaunchAgent" >&2
+  exit 1
+fi
+
 launchctl kickstart -k "gui/$(id -u)/com.desk-display.agent-usage-bridge"
 
 echo "Agent usage bridge installed and started"

@@ -8,6 +8,9 @@ export function PixelatedImage({
   const imageClassName = ["[image-rendering:pixelated]", className]
     .filter(Boolean)
     .join(" ");
+  const versionedSource = src.startsWith("/")
+    ? `${src}${src.includes("?") ? "&" : "?"}deskDisplayVersion=${encodeURIComponent(__DESK_DISPLAY_VERSION__)}`
+    : src;
 
-  return <img alt={alt} className={imageClassName} src={src} />;
+  return <img alt={alt} className={imageClassName} src={versionedSource} />;
 }

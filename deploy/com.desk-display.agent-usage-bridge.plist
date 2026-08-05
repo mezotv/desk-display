@@ -11,6 +11,8 @@
   </array>
   <key>EnvironmentVariables</key>
   <dict>
+    <key>PATH</key>
+    <string>__BRIDGE_PATH_ENVIRONMENT__</string>
     <key>DESK_DISPLAY_BRIDGE_HOST</key>
     <string>0.0.0.0</string>
     <key>DESK_DISPLAY_BRIDGE_PORT</key>

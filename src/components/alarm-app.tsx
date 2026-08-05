@@ -173,7 +173,7 @@ export function AlarmApp({
           <img
             alt=""
             className="size-28 [image-rendering:pixelated]"
-            src="/logos/alarm-pixel.svg"
+            src={`/logos/alarm-pixel.svg?deskDisplayVersion=${encodeURIComponent(__DESK_DISPLAY_VERSION__)}`}
           />
           <strong className="text-[23px] font-bold tracking-[0.055em] text-[#7d7d89]">
             {copy.empty}
