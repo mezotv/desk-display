@@ -16,10 +16,25 @@ export const agentDailyTokenUsageSchema = Schema.Struct({
   tokens: Schema.Number.check(Schema.isGreaterThanOrEqualTo(0)),
 });
 
+const nonNegativeTokenCountSchema = Schema.Number.check(
+  Schema.isGreaterThanOrEqualTo(0),
+);
+
+export const agentModelTokenUsageSchema = Schema.Struct({
+  cacheReadTokens: nonNegativeTokenCountSchema,
+  cacheWriteLongTokens: nonNegativeTokenCountSchema,
+  cacheWriteTokens: nonNegativeTokenCountSchema,
+  inputTokens: nonNegativeTokenCountSchema,
+  model: Schema.String,
+  outputTokens: nonNegativeTokenCountSchema,
+});
+
 export const agentProviderUsageSchema = Schema.Struct({
   available: Schema.Boolean,
   dailyTokens: Schema.Array(agentDailyTokenUsageSchema),
   error: Schema.NullOr(Schema.String),
+  modelTokens: Schema.Array(agentModelTokenUsageSchema),
+  stale: Schema.Boolean,
   updatedAt: Schema.String,
   windows: Schema.Array(agentUsageWindowSchema),
 });
@@ -73,7 +88,14 @@ export const claudeUsageCommandResponseSchema = Schema.Struct({
 export const claudeSessionUsageSchema = Schema.Struct({
   message: Schema.Struct({
     id: Schema.String,
+    model: Schema.String,
     usage: Schema.Struct({
+      cache_creation: Schema.optionalKey(
+        Schema.Struct({
+          ephemeral_1h_input_tokens: Schema.optionalKey(Schema.Number),
+          ephemeral_5m_input_tokens: Schema.optionalKey(Schema.Number),
+        }),
+      ),
       cache_creation_input_tokens: Schema.optionalKey(Schema.Number),
       cache_read_input_tokens: Schema.optionalKey(Schema.Number),
       input_tokens: Schema.optionalKey(Schema.Number),
@@ -82,6 +104,28 @@ export const claudeSessionUsageSchema = Schema.Struct({
   }),
   timestamp: Schema.String,
   type: Schema.Literals(["assistant"]),
+});
+
+export const codexSessionTurnContextSchema = Schema.Struct({
+  payload: Schema.Struct({ model: Schema.String }),
+  timestamp: Schema.String,
+  type: Schema.Literals(["turn_context"]),
+});
+
+export const codexSessionTokenUsageSchema = Schema.Struct({
+  payload: Schema.Struct({
+    info: Schema.Struct({
+      last_token_usage: Schema.Struct({
+        cache_write_input_tokens: Schema.optionalKey(Schema.Number),
+        cached_input_tokens: Schema.optionalKey(Schema.Number),
+        input_tokens: Schema.optionalKey(Schema.Number),
+        output_tokens: Schema.optionalKey(Schema.Number),
+      }),
+    }),
+    type: Schema.Literals(["token_count"]),
+  }),
+  timestamp: Schema.String,
+  type: Schema.Literals(["event_msg"]),
 });
 
 export class AgentUsageBridgeError extends Schema.TaggedErrorClass<AgentUsageBridgeError>()(

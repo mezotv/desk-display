@@ -49,12 +49,15 @@ if (!bearerToken) {
 let cache: { expiresAt: number; response: AgentUsageBridgeResponse } | null =
   null;
 let inFlight: Promise<AgentUsageBridgeResponse> | null = null;
+const lastGoodProvider = new Map<"claude" | "codex", AgentProviderUsage>();
 
 function unavailableProvider(provider: "claude" | "codex"): AgentProviderUsage {
   return {
     available: false,
     dailyTokens: [],
     error: `${provider === "codex" ? "Codex" : "Claude"} usage is unavailable`,
+    modelTokens: [],
+    stale: false,
     updatedAt: new Date().toISOString(),
     windows: [],
   };
@@ -64,7 +67,10 @@ function recoverProvider(provider: "claude" | "codex") {
   return (error: { readonly message: string }) =>
     Effect.sync(() => {
       console.error(`${provider} usage unavailable: ${error.message}`);
-      return unavailableProvider(provider);
+      const previous = lastGoodProvider.get(provider);
+      return previous
+        ? { ...previous, error: error.message, stale: true }
+        : unavailableProvider(provider);
     });
 }
 
@@ -80,6 +86,11 @@ const readUsage = Effect.fn("AgentUsageBridge.readUsage")(function*() {
     ],
     { concurrency: "unbounded" },
   );
+
+  if (codex.available && !codex.stale) lastGoodProvider.set("codex", codex);
+  if (claude.available && !claude.stale) {
+    lastGoodProvider.set("claude", claude);
+  }
 
   return {
     claude,

@@ -20,9 +20,15 @@ import {
 } from "@/schemas/agent-usage";
 import type {
   AgentDailyTokenUsage,
+  AgentModelTokenUsage,
   AgentProviderUsage,
+  AgentTokenBreakdown,
   AgentUsageWindow,
 } from "@/types/agent-usage";
+import {
+  addAgentModelTokenUsage,
+  toAgentModelTokenUsage,
+} from "@/utils/add-agent-model-token-usage";
 import {
   getAgentUsageDateKey,
   getAgentUsageDateKeys,
@@ -162,9 +168,13 @@ async function findRecentClaudeSessionFiles(
   return nestedFiles.flat();
 }
 
-async function readClaudeDailyTokens(): Promise<AgentDailyTokenUsage[]> {
+async function readClaudeLocalTokens(): Promise<{
+  dailyTokens: AgentDailyTokenUsage[];
+  modelTokens: AgentModelTokenUsage[];
+}> {
   const dateKeys = getAgentUsageDateKeys();
   const tokenTotals = new Map(dateKeys.map((date) => [date, 0]));
+  const modelTotals = new Map<string, AgentTokenBreakdown>();
   const seenMessageIds = new Set<string>();
   const cutoffTimestamp =
     Date.now() - (AGENT_USAGE_DAY_COUNT + 1) * 24 * 60 * 60_000;
@@ -197,16 +207,47 @@ async function readClaudeDailyTokens(): Promise<AgentDailyTokenUsage[]> {
 
       seenMessageIds.add(session.message.id);
       const usage = session.message.usage;
+      const cacheWriteLongTokens = Math.max(
+        0,
+        usage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
+      );
+      const cacheWriteTokens = Math.max(
+        0,
+        usage.cache_creation?.ephemeral_5m_input_tokens ??
+          Math.max(
+            0,
+            (usage.cache_creation_input_tokens ?? 0) -
+              cacheWriteLongTokens,
+          ),
+      );
       const tokens =
         (usage.input_tokens ?? 0) +
         (usage.cache_creation_input_tokens ?? 0) +
         (usage.cache_read_input_tokens ?? 0) +
         (usage.output_tokens ?? 0);
       tokenTotals.set(dateKey, (tokenTotals.get(dateKey) ?? 0) + tokens);
+      if (session.message.model !== "<synthetic>") {
+        addAgentModelTokenUsage(modelTotals, session.message.model, {
+          cacheReadTokens: Math.max(
+            0,
+            usage.cache_read_input_tokens ?? 0,
+          ),
+          cacheWriteLongTokens,
+          cacheWriteTokens,
+          inputTokens: Math.max(0, usage.input_tokens ?? 0),
+          outputTokens: Math.max(0, usage.output_tokens ?? 0),
+        });
+      }
     }
   }
 
-  return dateKeys.map((date) => ({ date, tokens: tokenTotals.get(date) ?? 0 }));
+  return {
+    dailyTokens: dateKeys.map((date) => ({
+      date,
+      tokens: tokenTotals.get(date) ?? 0,
+    })),
+    modelTokens: toAgentModelTokenUsage(modelTotals),
+  };
 }
 
 export const readClaudeAgentUsage = Effect.fn("AgentUsage.readClaude")(
@@ -214,7 +255,7 @@ export const readClaudeAgentUsage = Effect.fn("AgentUsage.readClaude")(
     AgentProviderUsage,
     AgentUsageBridgeError
   > {
-    const [commandOutput, dailyTokens] = yield* Effect.all(
+    const [commandOutput, localTokens] = yield* Effect.all(
       [
         Effect.tryPromise({
           try: runClaudeUsageCommand,
@@ -226,7 +267,7 @@ export const readClaudeAgentUsage = Effect.fn("AgentUsage.readClaude")(
             }),
         }),
         Effect.tryPromise({
-          try: readClaudeDailyTokens,
+          try: readClaudeLocalTokens,
           catch: (cause) =>
             new AgentUsageBridgeError({
               cause,
@@ -252,8 +293,10 @@ export const readClaudeAgentUsage = Effect.fn("AgentUsage.readClaude")(
 
     return {
       available: true,
-      dailyTokens,
+      dailyTokens: localTokens.dailyTokens,
       error: null,
+      modelTokens: localTokens.modelTokens,
+      stale: false,
       updatedAt: new Date().toISOString(),
       windows: parseClaudeUsageWindows(commandResponse.result),
     };

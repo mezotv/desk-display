@@ -15,10 +15,37 @@ export type AgentDailyTokenUsage = {
   tokens: number;
 };
 
+export type AgentTokenBreakdown = {
+  cacheReadTokens: number;
+  cacheWriteLongTokens: number;
+  cacheWriteTokens: number;
+  inputTokens: number;
+  outputTokens: number;
+};
+
+export type AgentModelTokenUsage = AgentTokenBreakdown & {
+  model: string;
+};
+
+export type AgentModelCostEstimate = AgentModelTokenUsage & {
+  estimatedUsd: number | null;
+  provider: AgentUsageProvider;
+};
+
+export type AgentCostEstimate = {
+  estimatedUsd: number;
+  models: readonly AgentModelCostEstimate[];
+  pricedTokens: number;
+  tokens: AgentTokenBreakdown;
+  unpricedTokens: number;
+};
+
 export type AgentProviderUsage = {
   available: boolean;
   dailyTokens: readonly AgentDailyTokenUsage[];
   error: string | null;
+  modelTokens: readonly AgentModelTokenUsage[];
+  stale: boolean;
   updatedAt: string;
   windows: readonly AgentUsageWindow[];
 };
@@ -60,4 +87,10 @@ export type AgentUsageChartProps = {
   dailyTokens: readonly AgentDailyTokenUsage[];
   language: DisplayLanguage;
   provider: AgentUsageProvider;
+};
+
+export type AgentCostAppProps = {
+  language: DisplayLanguage;
+  slideIndex: number;
+  snapshot: AgentUsageSnapshot;
 };

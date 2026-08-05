@@ -16,6 +16,7 @@ import type {
   AgentUsageWindow,
 } from "@/types/agent-usage";
 import { getAgentUsageDateKeys } from "@/utils/get-agent-usage-date-keys";
+import { readCodexModelTokens } from "@/utils/read-codex-model-tokens.server";
 
 type CodexRpcResults = {
   rateLimits: unknown;
@@ -160,15 +161,24 @@ export const readCodexAgentUsage = Effect.fn("AgentUsage.readCodex")(
     AgentProviderUsage,
     AgentUsageBridgeError
   > {
-    const rpcResults = yield* Effect.tryPromise({
-      try: readCodexRpcResults,
-      catch: (cause) =>
-        new AgentUsageBridgeError({
-          cause,
-          message: "Unable to read Codex usage",
-          provider: "codex",
+    const [rpcResults, modelTokens] = yield* Effect.all(
+      [
+        Effect.tryPromise({
+          try: readCodexRpcResults,
+          catch: (cause) =>
+            new AgentUsageBridgeError({
+              cause,
+              message: "Unable to read Codex usage",
+              provider: "codex",
+            }),
         }),
-    });
+        Effect.tryPromise({
+          try: readCodexModelTokens,
+          catch: (cause) => cause,
+        }).pipe(Effect.catch(() => Effect.succeed([]))),
+      ],
+      { concurrency: "unbounded" },
+    );
     const rateLimitResponse = yield* Schema.decodeUnknownEffect(
       codexRateLimitsResponseSchema,
     )(rpcResults.rateLimits).pipe(
@@ -234,6 +244,8 @@ export const readCodexAgentUsage = Effect.fn("AgentUsage.readCodex")(
       available: true,
       dailyTokens,
       error: null,
+      modelTokens,
+      stale: false,
       updatedAt: new Date().toISOString(),
       windows,
     };

@@ -30,7 +30,7 @@ export function AgentUsageApp({
   const slides = getAgentUsageSlides(snapshot, provider);
   const requestedProviderStyle = PROVIDER_STYLES[provider];
 
-  if (!snapshot.configured || !snapshot.online || slides.length === 0) {
+  if (!snapshot.configured || slides.length === 0) {
     const message = !snapshot.configured
       ? copy.addBridge
       : !snapshot.online
@@ -60,6 +60,8 @@ export function AgentUsageApp({
   const slide = slides[activeSlideIndex];
   const providerStyle = PROVIDER_STYLES[slide.provider];
   const providerName = copy[slide.provider];
+  const showingCachedData =
+    !snapshot.online || snapshot[slide.provider].stale;
 
   return (
     <div className="flex w-[min(90vw,1320px)] flex-col items-center justify-center gap-[clamp(16px,3.25vh,34px)] text-center transition-transform duration-100 group-active:scale-[0.985]">
@@ -78,6 +80,7 @@ export function AgentUsageApp({
           </strong>
           <span className="mt-2 block text-[clamp(13px,min(1.6vw,2.6vh),21px)] font-bold tracking-[0.12em] text-[#555561]">
             {activeSlideIndex + 1} / {slides.length}
+            {showingCachedData ? ` · ${copy.cached}` : ""}
           </span>
         </div>
       </header>

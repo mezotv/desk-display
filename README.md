@@ -12,6 +12,7 @@ The app is built with React, TanStack Start, Effect, and Tailwind CSS v4. The in
 - Google Calendar with upcoming events
 - Read-only X profile and touch-cycled 30-day analytics
 - Touch-cycled Codex and Claude limits, reset countdowns, and seven-day token charts while a paired Mac is awake
+- Seven-day API-equivalent AI cost estimates by model, input, output, cache read, and cache write
 - Clock, world clock, alarms, countdown timer, stopwatch, and persistent Pomodoro sessions
 - Touch-first Tic-Tac-Toe, Pong, and multi-hit Brick Breaker games
 - Moon phase with dynamically rendered pixel illumination
@@ -90,9 +91,11 @@ Desk Display requests at most 100 authored posts and caches X responses on the s
 
 ### Codex and Claude usage
 
-The separate Codex and Claude apps read usage from a small authenticated bridge running on your Mac. This is necessary because personal subscription limits live with their signed-in desktop CLIs, not on the Raspberry Pi. When the Mac sleeps or leaves the network, the display shows **Mac is offline** instead of stale data as if it were current.
+The separate Codex and Claude apps read usage from a small authenticated bridge running on your Mac. This is necessary because personal subscription limits live with their signed-in desktop CLIs, not on the Raspberry Pi. When a provider rejects a refresh, the Mac sleeps, or it leaves the network, Desk Display preserves the last successful provider snapshot and labels it **Last good data** instead of blanking the screen.
 
-The bridge uses the [official Codex app server](https://learn.chatgpt.com/docs/app-server.md) `account/rateLimits/read` and `account/usage/read` methods. For Claude it runs the [documented Claude Code `/usage` command](https://support.claude.com/en/articles/14553413-claude-code-cheatsheet) with tools disabled and a near-zero budget. Claude's seven-day chart is derived from local Claude Code session records, deduplicated by message ID, so it is explicitly labeled **This Mac only** and does not claim to include claude.ai or other computers. Prompts and conversation content never leave the Mac bridge; the Pi receives only percentages, reset timestamps, and daily token totals.
+The bridge uses the [official Codex app server](https://learn.chatgpt.com/docs/app-server.md) `account/rateLimits/read` and `account/usage/read` methods. For Claude it runs the [documented Claude Code `/usage` command](https://support.claude.com/en/articles/14553413-claude-code-cheatsheet) with tools disabled and a near-zero budget. Seven-day token and cost data is derived from local Codex and Claude session records; Claude messages are deduplicated by message ID. Prompt and response fields are never extracted, logged, or sent to the Pi. The bridge transmits only model names, numeric token categories, percentages, reset timestamps, and dates.
+
+The AI Cost app estimates what the same local token mix would cost at standard API list prices. It is deliberately labeled **API equivalent** and **not your subscription bill**: Codex and Claude subscription usage is not an API invoice. Unknown models stay unpriced rather than inheriting a guessed rate. Prices were last reviewed on 2026-08-05 against [OpenAI's official model pricing](https://developers.openai.com/api/docs/models/compare) and [Anthropic's official pricing table](https://platform.claude.com/docs/en/about-claude/pricing).
 
 Build and test the bridge on the Mac first:
 
@@ -117,7 +120,7 @@ AGENT_USAGE_BRIDGE_URL=http://192.168.1.23:4747
 AGENT_USAGE_BRIDGE_TOKEN=copy_the_contents_of_the_generated_token_file
 ```
 
-Keep the Mac and Pi on a trusted home network, leave the bearer token file and Pi `.env` readable only by their owners, and reserve the Mac's LAN address in your router so it does not change. The bridge caches expensive local collection for 30 seconds. Desk Display refreshes it once per minute while either usage app is visible and once every ten minutes in the background; it does not continuously poll either CLI.
+Keep the Mac and Pi on a trusted home network, leave the bearer token file and Pi `.env` readable only by their owners, and reserve the Mac's LAN address in your router so it does not change. The bridge caches expensive local collection for four minutes. Desk Display refreshes it once every five minutes while a usage or cost app is visible and once every 30 minutes in the background; it does not continuously poll either CLI.
 
 ## OLED protection
 

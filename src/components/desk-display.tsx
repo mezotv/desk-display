@@ -18,6 +18,7 @@ import {
   AGENT_USAGE_ACTIVE_REFRESH_INTERVAL_MS,
   AGENT_USAGE_BACKGROUND_REFRESH_INTERVAL_MS,
 } from "@/constants/agent-usage";
+import { AGENT_COST_SLIDE_COUNT } from "@/constants/agent-cost";
 import { BOOT_LOADER_MINIMUM_MS } from "@/constants/boot";
 import {
   SPOTIFY_ACTIVE_REFRESH_INTERVAL_MS,
@@ -135,6 +136,7 @@ export function DeskDisplay({
 }: DeskDisplayProps) {
   const [activeApp, setActiveApp] = useState<AppId>("stripe");
   const [agentUsage, setAgentUsage] = useState(initialAgentUsage);
+  const [agentCostSlideIndex, setAgentCostSlideIndex] = useState(0);
   const [claudeUsageSlideIndex, setClaudeUsageSlideIndex] = useState(0);
   const [codexUsageSlideIndex, setCodexUsageSlideIndex] = useState(0);
   const [alarms, setAlarms] = useState<Alarm[]>([]);
@@ -388,7 +390,18 @@ export function DeskDisplay({
 
   const updateAgentUsage = useCallback(async () => {
     try {
-      setAgentUsage(await refreshAgentUsage());
+      const nextUsage = await refreshAgentUsage();
+      setAgentUsage((previous) => ({
+        ...nextUsage,
+        claude:
+          !nextUsage.claude.available && previous.claude.available
+            ? { ...previous.claude, error: nextUsage.claude.error, stale: true }
+            : nextUsage.claude,
+        codex:
+          !nextUsage.codex.available && previous.codex.available
+            ? { ...previous.codex, error: nextUsage.codex.error, stale: true }
+            : nextUsage.codex,
+      }));
     } catch (error) {
       console.error("Unable to refresh AI usage", error);
     }
@@ -468,7 +481,9 @@ export function DeskDisplay({
   );
 
   const isAgentUsageVisible =
-    (activeApp === "codex-usage" || activeApp === "claude-usage") &&
+    (activeApp === "codex-usage" ||
+      activeApp === "claude-usage" ||
+      activeApp === "agent-cost") &&
     !launcherOpen;
   useRecurringRefresh(
     updateAgentUsage,
@@ -569,6 +584,12 @@ export function DeskDisplay({
         const slideCount = getAgentUsageSlides(agentUsage, "claude").length;
         setClaudeUsageSlideIndex(
           (slideIndex) => (slideIndex + 1) % Math.max(1, slideCount),
+        );
+      }
+
+      if (activeApp === "agent-cost") {
+        setAgentCostSlideIndex(
+          (slideIndex) => (slideIndex + 1) % AGENT_COST_SLIDE_COUNT,
         );
       }
 
@@ -834,6 +855,7 @@ export function DeskDisplay({
     >
       <ActiveApp
         activeApp={activeApp}
+        agentCostSlideIndex={agentCostSlideIndex}
         agentUsage={agentUsage}
         calendar={calendar}
         claudeUsageSlideIndex={claudeUsageSlideIndex}

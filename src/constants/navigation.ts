@@ -10,6 +10,7 @@ export const APP_IDS = [
   "twitter",
   "codex-usage",
   "claude-usage",
+  "agent-cost",
   "timer",
   "pomodoro",
   "stopwatch",

@@ -56,6 +56,12 @@ export const APP_DEFINITIONS: AppDefinition[] = [
     label: { de: "CLAUDE", en: "CLAUDE" },
   },
   {
+    accent: "#34d399",
+    icon: "/logos/agent-cost-pixel.svg",
+    id: "agent-cost",
+    label: { de: "AI KOSTEN", en: "AI COST" },
+  },
+  {
     accent: "#f97316",
     icon: "/logos/timer-pixel.svg",
     id: "timer",

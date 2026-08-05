@@ -20,6 +20,7 @@ export type AppId =
   | "twitter"
   | "codex-usage"
   | "claude-usage"
+  | "agent-cost"
   | "timer"
   | "pomodoro"
   | "stopwatch"
@@ -45,6 +46,7 @@ export type AppDefinition = {
 export type ActiveAppProps = {
   activeApp: AppId;
   agentUsage: AgentUsageSnapshot;
+  agentCostSlideIndex: number;
   claudeUsageSlideIndex: number;
   codexUsageSlideIndex: number;
   calendar: CalendarSnapshot;

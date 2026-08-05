@@ -24,6 +24,8 @@ function unavailableProvider(): AgentProviderUsage {
     available: false,
     dailyTokens: [],
     error: null,
+    modelTokens: [],
+    stale: false,
     updatedAt: new Date().toISOString(),
     windows: [],
   };
@@ -47,6 +49,18 @@ function getAgentUsageEnvironment() {
     AGENT_USAGE_BRIDGE_TOKEN: process.env.AGENT_USAGE_BRIDGE_TOKEN,
     AGENT_USAGE_BRIDGE_URL: process.env.AGENT_USAGE_BRIDGE_URL,
   });
+}
+
+function preserveLastGoodProvider(
+  previous: AgentProviderUsage | undefined,
+  next: AgentProviderUsage,
+): AgentProviderUsage {
+  if (next.available || !previous?.available) return next;
+  return {
+    ...previous,
+    error: next.error,
+    stale: true,
+  };
 }
 
 const getAgentUsageSnapshotEffect = Effect.fn("AgentUsage.getSnapshot")(
@@ -100,7 +114,15 @@ const getAgentUsageSnapshotEffect = Effect.fn("AgentUsage.getSnapshot")(
     );
     const snapshot = {
       ...payload,
+      claude: preserveLastGoodProvider(
+        agentUsageCache?.snapshot.claude,
+        payload.claude,
+      ),
       configured: true,
+      codex: preserveLastGoodProvider(
+        agentUsageCache?.snapshot.codex,
+        payload.codex,
+      ),
       online: true,
     } satisfies AgentUsageSnapshot;
 

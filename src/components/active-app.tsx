@@ -1,6 +1,7 @@
 import { memo } from "react";
 
 import { AgentUsageApp } from "@/components/agent-usage-app";
+import { AgentCostApp } from "@/components/agent-cost-app";
 import { CalendarApp } from "@/components/calendar-app";
 import { DaylightApp } from "@/components/daylight-app";
 import { MarqueeCard } from "@/components/marquee-card";
@@ -30,6 +31,7 @@ import { getTimeProgress } from "@/utils/get-time-progress";
 
 function ActiveAppView({
   activeApp,
+  agentCostSlideIndex,
   agentUsage,
   calendar,
   claudeUsageSlideIndex,
@@ -238,6 +240,14 @@ function ActiveAppView({
             now={now}
             provider="claude"
             slideIndex={claudeUsageSlideIndex}
+            snapshot={agentUsage}
+          />
+        )}
+
+        {activeApp === "agent-cost" && (
+          <AgentCostApp
+            language={language}
+            slideIndex={agentCostSlideIndex}
             snapshot={agentUsage}
           />
         )}

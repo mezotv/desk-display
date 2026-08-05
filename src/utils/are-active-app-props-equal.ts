@@ -48,6 +48,11 @@ export function areActiveAppPropsEqual(
         previous.claudeUsageSlideIndex === next.claudeUsageSlideIndex &&
         previous.now.getTime() === next.now.getTime()
       );
+    case "agent-cost":
+      return (
+        previous.agentUsage === next.agentUsage &&
+        previous.agentCostSlideIndex === next.agentCostSlideIndex
+      );
     case "clock":
     case "world":
     case "moon":
